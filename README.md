@@ -36,7 +36,7 @@ sqlalchemy.url = postgresql://username:password@host:port/database_name
 
 ### Запуск проекта
 
-1. Запустите сервер: `uvicorn main:app --reload`
+1. Запустите сервер: `uvicorn src.app.main:app --reload`
 2. API должно быть доступно по адресу, указанному в консоли
 3. Пройдите все тесты в POSTMAN: 
 
