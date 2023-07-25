@@ -38,3 +38,6 @@ sqlalchemy.url = postgresql://username:password@host:port/database_name
 
 1. Запустите сервер: `uvicorn main:app --reload`
 2. API должно быть доступно по адресу, указанному в консоли
+3. Пройдите все тесты в POSTMAN: 
+
+![Screenshot of successful passing tests](https://github.com/dellream/REST-API-app_test_task/blob/main/%D0%A1%D0%BA%D1%80%D0%B8%D0%BD%D1%88%D0%BE%D1%82_%D1%81_Postman.png?raw=true)
