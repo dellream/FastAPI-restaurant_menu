@@ -22,7 +22,7 @@ DATABASE_HOST = os.environ.get("DATABASE_HOST", "db")
 DATABASE_PORT = os.environ.get("DATABASE_PORT", "5432")
 DATABASE_NAME = os.environ.get("DATABASE_NAME", "mydatabase")
 
-# Формируем строку подключения
+# Формируем строку для подключения
 SQLALCHEMY_DATABASE_URL = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
