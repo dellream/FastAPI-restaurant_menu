@@ -11,17 +11,16 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Скопируем файлы alembic.ini
+COPY alembic.ini /app/
+
 # Скопируем файлы миграций Alembic в контейнер
 COPY migrations /app/migrations
 
-# Скопируем файлы вашего FastAPI приложения в контейнер
-COPY src /app/src
+# Скопируем файлы FastAPI приложения в контейнер
+COPY . /app/
 
 # Документируем порт контейнера, на котором будет работать Uvicorn
 EXPOSE 8000
 
-# Запустим миграции Alembic для создания базы данных
-RUN alembic upgrade head
 
-# Запустим Uvicorn при старте контейнера
-CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

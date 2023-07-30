@@ -1,3 +1,5 @@
+import os
+
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
@@ -6,12 +8,22 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import IntegrityError
 from typing import List
 
-from .schemas import MenuSchema, SubmenuSchema, DishSchema, SubmenuCreate, DishCreate
-from .models import Menu, Submenu, Dish
+from app.schemas import MenuSchema, SubmenuSchema, DishSchema, DishCreate
+from app.models import Menu, Submenu, Dish
 
 app = FastAPI()
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:1231@localhost:5432/postgres"
+
+# Проверяем наличие переменных окружения для подключения к базе данных
+# Если они не определены, используем значения по умолчанию
+DATABASE_USER = os.environ.get("DATABASE_USER", "myuser")
+DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", "mypassword")
+DATABASE_HOST = os.environ.get("DATABASE_HOST", "db")
+DATABASE_PORT = os.environ.get("DATABASE_PORT", "5432")
+DATABASE_NAME = os.environ.get("DATABASE_NAME", "mydatabase")
+
+# Формируем строку подключения
+SQLALCHEMY_DATABASE_URL = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
