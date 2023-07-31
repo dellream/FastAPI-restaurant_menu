@@ -7,40 +7,28 @@
 ### Описание проекта
 
 Этот проект представляет собой REST API для работы с меню ресторана.
-Основная цель данного тестового задания - пройти 161 тест в Postman, которые проверяют функциональность API.
+Основная цель данного тестового задания - создать REST API, обернуть приложение в Docker и написать тесты.
 Проект реализован с использованием FastAPI и PostgreSQL в качестве базы данных.
 
-### Установка и настройка проекта
+### Установка и запуск проекта
 
 1. Убедитесь, что у вас установлен Python версии 3.7 или выше.
 2. Клонируйте репозиторий с GitHub: `git clone https://github.com/dellream/REST-API-app_test_task.git`
-3. Перейдите в каталог проекта
-4. Установите зависимости: `pip install -r requirements.txt`
-5. Убедитесь, что у вас установлен PostgreSQL и создайте базу данных для проекта.
+3. Запустите проект с помощью docker-compose `docker-compose up -d`
 
-### Настройка базы данных
+### Завершение работы
+Чтобы остановить и удалить контейнеры, выполните следующую команду: `docker-compose down`
 
-1. Установите PostgreSQL: Убедитесь, что PostgreSQL установлен на вашей системе и работает.
-   Если его нет, установите PostgreSQL, а также инструмент командной строки psql, который позволяет взаимодействовать с базой данных.
-2. Создайте базу данных: Откройте командную строку или терминал и используйте psql, чтобы подключиться к PostgreSQL и создать базу данных для вашего проекта.
-3. В файле **main.py** необходимо изменить строку (вставьте свои данные): 
-```python
-postgresql://username:password@host:port/database_name
+### Тестирование с помощью pytest
+
+Запустите тесты с помощью следующей команды (после завершения тестов, контейнеры будут остановлены, но не удалены): 
 ```
-4. Повторите тоже самое для файла **alembic.ini**, нужно изменить строку 
-```python
-sqlalchemy.url = postgresql://username:password@host:port/database_name
+docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
 ```
-5. Создайте ревизию alembic: `alembic revision --autogenerate -m "Описание вашей ревизии"`
-6. Выполните миграцию: `alembic upgrade head`
 
-### Запуск проекта
+### Тестирование с помощью POSTMAN
 
-1. Запустите сервер: `uvicorn src.app.main:app --reload`
-2. API должно быть доступно по адресу, указанному в консоли
-3. Пройдите все тесты в POSTMAN: 
-
-![Screenshot of successful passing tests](https://github.com/dellream/REST-API-app_test_task/blob/main/%D0%A1%D0%BA%D1%80%D0%B8%D0%BD%D1%88%D0%BE%D1%82_%D1%81_Postman.png?raw=true)
+В репозитории есть директория "other_for_git", где находятся файлы с форматом .json для POSTMAN
 
 <sub>Инструкция по работе с POSTMAN:<br>
 ![Screenshot with instructions for POSTMAN](https://zenclass-files-hot-01.storage.yandexcloud.net/0873bcaa-7dd7-47c5-a5e7-332f1a61a56f.png)
