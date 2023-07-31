@@ -1,0 +1,6 @@
+.gitignore
+!.gitignore
+docker-compose.test.yml
+docker-compose.yml
+README.md
+other_for_git

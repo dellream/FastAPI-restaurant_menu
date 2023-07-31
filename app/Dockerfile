@@ -5,20 +5,14 @@ FROM python:3.10-slim
 ENV PYTHONUNBUFFERED 1
 
 # Установим рабочую директорию
-WORKDIR /app
+WORKDIR .
 
 # Установим зависимости
-COPY requirements.txt /app/
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Скопируем файлы alembic.ini
-COPY alembic.ini /app/
-
-# Скопируем файлы миграций Alembic в контейнер
-COPY migrations /app/migrations
-
 # Скопируем файлы FastAPI приложения в контейнер
-COPY . /app/
+COPY . .
 
 # Документируем порт контейнера, на котором будет работать Uvicorn
 EXPOSE 8000

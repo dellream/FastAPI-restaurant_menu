@@ -7,15 +7,9 @@ services:
     ports:
       - "8000:8000"
     entrypoint: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
-    environment:
-      - DATABASE_USER=myuser
-      - DATABASE_PASSWORD=mypassword
-      - DATABASE_HOST=db
-      - DATABASE_PORT=5432
-      - DATABASE_NAME=mydatabase
     depends_on:
-     db:
-       condition: service_healthy
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:15.1-alpine
