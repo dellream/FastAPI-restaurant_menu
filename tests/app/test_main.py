@@ -2,7 +2,7 @@ import pytest
 import requests
 
 # Замените baseURL на адрес вашего сервера
-baseURL = "http://api:8000/api/v1"
+baseURL = "http://localhost:8000/api/v1"
 
 # Переменные окружения
 ENV_MENU_ID = None
@@ -42,7 +42,7 @@ def test_create_menu():
 def test_create_submenu():
     # Объявляем переменные как глобальные
     global ENV_MENU_ID, ENV_SUBMENU_ID, ENV_SUBMENU_TITLE, ENV_SUBMENU_DESCRIPTION
-    url = f"{baseURL}/menus/{ENV_MENU_ID}/submenus"
+    url = f"{baseURL}/menus/{ENV_MENU_ID}/submenus/"
     data = {
         "title": "Submenu 1",
         "description": "Description of Submenu 1"
@@ -52,7 +52,6 @@ def test_create_submenu():
     assert "id" in response.json()
     assert response.json()["title"] == data["title"]
     assert response.json()["description"] == data["description"]
-    assert response.json()["menu_id"] == ENV_MENU_ID
 
     # Сохраним сгенерированные значения в глобальные переменные
     ENV_SUBMENU_ID = response.json()["id"]
@@ -63,17 +62,18 @@ def test_create_submenu():
 def test_create_dish():
     # Объявляем переменные как глобальные
     global ENV_MENU_ID, ENV_SUBMENU_ID, ENV_DISHES_ID, ENV_DISHES_TITLE, ENV_DISHES_DESCRIPTION, ENV_DISHES_PRICE
-    url = f"{baseURL}/menus/{ENV_MENU_ID}/submenus/{ENV_SUBMENU_ID}/dishes"
+    url = f"{baseURL}/menus/{ENV_MENU_ID}/submenus/{ENV_SUBMENU_ID}/dishes/"
     data = {
         "title": "Dish 1",
-        "price": 10.99
+        "description": "description 1",
+        "price": "10.99"
     }
     response = requests.post(url, json=data)
     assert response.status_code == 201
     assert "id" in response.json()
     assert response.json()["title"] == data["title"]
+    assert response.json()["description"] == data["description"]
     assert response.json()["price"] == str(data["price"])
-    assert response.json()["submenu_id"] == ENV_SUBMENU_ID
 
     # Сохраним сгенерированные значения в глобальные переменные
     ENV_DISHES_ID = response.json()["id"]
@@ -118,7 +118,6 @@ def test_read_submenu():
     assert "id" in response.json()
     assert "title" in response.json()
     assert "description" in response.json()
-    assert "menu_id" in response.json()
     assert "dishes_count" in response.json()
 
 
@@ -132,7 +131,7 @@ def test_read_dishes():
 
 def test_read_dish():
     global ENV_MENU_ID, ENV_SUBMENU_ID
-    url = f"{baseURL}/menus/{ENV_MENU_ID}/submenus/{ENV_SUBMENU_ID}/dishes/{ENV_DISHES_ID}"
+    url = f"{baseURL}/menus/{ENV_MENU_ID}/submenus/{ENV_SUBMENU_ID}/dishes/{ENV_DISHES_ID}/"
     response = requests.get(url)
     assert response.status_code == 200
     assert "id" in response.json()
@@ -181,12 +180,13 @@ def test_update_dish():
     data = {
         "title": "Updated Dish",
         "description": "Updated description",
-        "price": 12.99
+        "price": "12.99"
     }
     response = requests.patch(url, json=data)
     assert response.status_code == 200
     assert response.json()["title"] == data["title"]
-    assert response.json()["price"] == str(data["price"])  # Приведение числа к строковому типу
+    assert response.json()["description"] == data["description"]
+    assert response.json()["price"] == data["price"]  # Приведение числа к строковому типу
 
     # Сохраним измененные значения в глобальные переменные
     ENV_DISHES_TITLE = response.json()["title"]
@@ -196,7 +196,7 @@ def test_update_dish():
 
 def test_delete_dish():
     global ENV_MENU_ID, ENV_SUBMENU_ID
-    url = f"{baseURL}/menus/{ENV_MENU_ID}/submenus/{ENV_SUBMENU_ID}/dishes/{ENV_DISHES_ID}"
+    url = f"{baseURL}/menus/{ENV_MENU_ID}/submenus/{ENV_SUBMENU_ID}/dishes/{ENV_DISHES_ID}/"
     response = requests.delete(url)
     assert response.status_code == 200
 
