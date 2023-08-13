@@ -10,8 +10,7 @@ class DishBase(BaseModel):
 
 
 class DishSchema(DishBase):
-    class Config:
-        from_attributes = True
+    ...
 
 
 class DishResponse(DishSchema):

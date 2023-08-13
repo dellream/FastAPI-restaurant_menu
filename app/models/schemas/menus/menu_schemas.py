@@ -1,8 +1,4 @@
-from typing import List
-
 from pydantic import BaseModel
-
-from app.models.schemas.menus.submenu_schemas import SubmenuSchema
 
 
 class MenuBase(BaseModel):
@@ -11,10 +7,7 @@ class MenuBase(BaseModel):
 
 
 class MenuSchema(MenuBase):
-    submenus: List[SubmenuSchema] = []
-
-    class Config:
-        from_attributes = True
+    ...
 
 
 class MenuResponse(MenuSchema):

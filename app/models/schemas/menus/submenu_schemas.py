@@ -1,8 +1,6 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
-
-from app.models.schemas.menus.dish_schemas import DishSchema
 
 
 class SubmenuBase(BaseModel):
@@ -11,10 +9,7 @@ class SubmenuBase(BaseModel):
 
 
 class SubmenuSchema(SubmenuBase):
-    dishes: List[DishSchema] = []
-
-    class Config:
-        from_attributes = True
+    ...
 
 
 class SubmenuResponse(SubmenuSchema):
