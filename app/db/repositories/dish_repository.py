@@ -2,31 +2,31 @@ import uuid
 from typing import List
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, distinct
+from sqlalchemy import select
 from fastapi import HTTPException, status, Depends
 
-from app.db.database_connect import get_db
-from app.models.domain.menus_models import Menu, Submenu, Dish
+from app.db.database_connect import get_async_session
+from app.models.domain.menus_models import Dish
 
 
-class DishRepository:
-    def __init__(self, session: Session = Depends(get_db)):
+class AsyncDishRepository:
+    def __init__(self, session: Session = Depends(get_async_session)):
         self.session = session
 
-    def create_dish(self, submenu_id: str, dish):
+    async def create_dish(self, submenu_id: str, dish):
         dish_obj = Dish(title=dish.title,
                         description=dish.description,
                         submenu_id=submenu_id,
                         price=dish.price)
         dish_obj.id = str(uuid.uuid4())
         self.session.add(dish_obj)
-        self.session.commit()
-        self.session.refresh(dish_obj)
+        await self.session.commit()
+        await self.session.refresh(dish_obj)
 
         return dish_obj
 
-    def read_all_dishes(self) -> List[Dish]:
-        query = self.session.execute(
+    async def read_all_dishes(self) -> List[Dish]:
+        query = await self.session.execute(
             select(
                 Dish.id,
                 Dish.title,
@@ -39,8 +39,8 @@ class DishRepository:
 
         return query.all()
 
-    def read_dish(self, dish_id: str) -> Dish:
-        query = self.session.execute(
+    async def read_dish(self, dish_id: str) -> Dish:
+        query = await self.session.execute(
             select(
                 Dish.id,
                 Dish.title,
@@ -48,36 +48,37 @@ class DishRepository:
                 Dish.price
             )
             .filter(Dish.id == dish_id)
-            .group_by(Dish.id)
+            # .group_by(Dish.id)
         )
 
         item: Dish = query.first()
 
-        if not item:
+        if item:
+            return item
+        else:
             raise HTTPException(status.HTTP_404_NOT_FOUND,
                                 detail='dish not found')
 
-        return item
+    async def update_dish(self, dish_id: str, updated_dish: dict):
+        dish = await self.session.get(Dish, dish_id)
 
-    def update_dish(self, dish_id: str, updated_dish: dict):
-        dish = self.session.query(Dish).get(dish_id)
+        if dish:
+            for key, value in updated_dish.dict(exclude_unset=True).items():
+                setattr(dish, key, value)
 
-        if not dish:
+            await self.session.commit()
+            await self.session.refresh(dish)
+            return dish
+        else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="dish not found")
 
-        for key, value in updated_dish.dict(exclude_unset=True).items():
-            setattr(dish, key, value)
-
-        self.session.commit()
-        self.session.refresh(dish)
-        return dish
-
-    def delete_dish(self, dish_id: str):
-        dish = self.session.query(Dish).get(dish_id)
-        if not dish:
+    async def delete_dish(self, dish_id: str):
+        dish = await self.session.get(Dish, dish_id)
+        if dish:
+            await self.session.delete(dish)
+            await self.session.commit()
+            return dish
+        else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="dish not found")
-        self.session.delete(dish)
-        self.session.commit()
-        return dish

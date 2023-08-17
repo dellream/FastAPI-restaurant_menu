@@ -13,6 +13,3 @@ app.include_router(menu_routers)
 app.include_router(submenu_routers)
 app.include_router(dish_routers)
 
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -8,3 +8,7 @@ DB_PORT = os.environ.get("DB_PORT")
 DB_NAME = os.environ.get("DB_NAME")
 DB_USER = os.environ.get("DB_USER")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
+
+BASE_URL = "http://localhost:8000/api/v1"
+DOCKER_URL = "http://api:8000/api/v1"
+

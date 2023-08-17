@@ -5,27 +5,26 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func, distinct
 from fastapi import HTTPException, status, Depends
 
-from app.db.database_connect import get_db
-from app.models.domain.menus_models import Menu, Submenu, Dish
+from app.db.database_connect import get_async_session
+from app.models.domain.menus_models import Submenu, Dish
 
 
-class SubmenuRepository:
-    def __init__(self, session: Session = Depends(get_db)):
+class AsyncSubmenuRepository:
+    def __init__(self, session: Session = Depends(get_async_session)):
         self.session = session
 
-    def create_submenu(self, menu_id: str, submenu):
+    async def create_submenu(self, menu_id: str, submenu):
         submenu_obj = Submenu(title=submenu.title,
                               description=submenu.description,
                               menu_id=menu_id)
         submenu_obj.id = str(uuid.uuid4())
-        self.session.add(submenu_obj)
-        self.session.commit()
-        self.session.refresh(submenu_obj)
-
+        self.session.add(submenu_obj)  # Добавляем сформированный объект в сессию
+        await self.session.commit()
+        await self.session.refresh(submenu_obj)
         return submenu_obj
 
-    def read_all_submenus(self) -> List[Submenu]:
-        query = self.session.execute(
+    async def read_all_submenus(self) -> List[Submenu]:
+        query = await self.session.execute(
             select(
                 Submenu.id,
                 Submenu.title,
@@ -39,8 +38,8 @@ class SubmenuRepository:
 
         return query.all()
 
-    def read_submenu(self, submenu_id: str) -> Submenu:
-        query = self.session.execute(
+    async def read_submenu(self, submenu_id: str) -> Submenu:
+        query = await self.session.execute(
             select(
                 Submenu.id,
                 Submenu.title,
@@ -54,30 +53,33 @@ class SubmenuRepository:
 
         item: Submenu = query.first()
 
-        if not item:
+        if item:
+            return item
+        else:
             raise HTTPException(status.HTTP_404_NOT_FOUND,
                                 detail='submenu not found')
 
-        return item
+    async def update_submenu(self, submenu_id: str, updated_submenu: dict):
+        submenu = await self.session.get(Submenu, submenu_id)
 
-    def update_submenu(self, submenu_id: str, updated_submenu: dict):
-        submenu = self.session.query(Submenu).get(submenu_id)
+        if submenu:
+            # Изменим текущее меню на основе принятого измененного updated_submenu
+            for key, value in updated_submenu.dict(exclude_unset=True).items():
+                setattr(submenu, key, value)  # Меняем значение аттрибута menu по его имени key на значение value
 
-        if not submenu:
+            await self.session.commit()
+            await self.session.refresh(submenu)
+            return submenu
+        else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="submenu not found")
 
-        for key, value in updated_submenu.dict(exclude_unset=True).items():
-            setattr(submenu, key, value)
-
-        self.session.commit()
-        self.session.refresh(submenu)
-        return submenu
-
-    def delete_submenu(self, submenu_id: str):
-        submenu = self.session.query(Submenu).get(submenu_id)
-        if not submenu:
+    async def delete_submenu(self, submenu_id: str):
+        submenu = await self.session.get(Submenu, submenu_id)
+        if submenu:
+            await self.session.delete(submenu)
+            await self.session.commit()
+            return submenu
+        else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="submenu not found")
-        self.session.delete(submenu)
-        self.session.commit()
-        return submenu
+

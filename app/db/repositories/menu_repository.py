@@ -5,33 +5,24 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func, distinct
 from fastapi import HTTPException, status, Depends
 
-
-from app.db.database_connect import get_db
+from app.db.database_connect import get_async_session
 from app.models.domain.menus_models import Menu, Submenu, Dish
 
 
-class MenuRepository:
-    def __init__(self, session: Session = Depends(get_db)):
+class AsyncMenuRepository:
+    def __init__(self, session: Session = Depends(get_async_session)):
         self.session = session
 
-    # def count_submenus(self, menu_id: int):
-    #     return self.session.query(Submenu).filter_by(menu_id=menu_id).count()
-    #
-    # def count_dishes(self, menu_id: int):
-    #     return self.session.query(Dish).join(Submenu).filter(Submenu.menu_id == menu_id).count()
-
-    def create_menu(self, menu):
-        menu_obj = Menu(title=menu.title,
-                        description=menu.description)
+    async def create_menu(self, menu):
+        menu_obj = Menu(title=menu.title, description=menu.description)
         menu_obj.id = str(uuid.uuid4())
         self.session.add(menu_obj)
-        self.session.commit()
-        self.session.refresh(menu_obj)
-
+        await self.session.commit()
+        await self.session.refresh(menu_obj)
         return menu_obj
 
-    def read_all_menus(self) -> List[Menu]:
-        query = self.session.execute(
+    async def read_all_menus(self) -> List[Menu]:
+        query = await self.session.execute(
             select(
                 Menu.id,
                 Menu.title,
@@ -43,11 +34,10 @@ class MenuRepository:
             .outerjoin(Dish, Submenu.id == Dish.submenu_id)
             .group_by(Menu.id)
         )
-
         return query.all()
 
-    def read_menu(self, menu_id: str) -> Menu:
-        query = self.session.execute(
+    async def read_menu(self, menu_id: str) -> Menu:
+        query = await self.session.execute(
             select(
                 Menu.id,
                 Menu.title,
@@ -60,37 +50,32 @@ class MenuRepository:
             .filter(Menu.id == menu_id)
             .group_by(Menu.id)
         )
-
         item: Menu = query.first()
 
-        if not item:
-            raise HTTPException(status.HTTP_404_NOT_FOUND,
-                                detail='menu not found')
+        if item:
+            return item
+        else:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail='menu not found')
 
-        return item
+    async def update_menu(self, menu_id: str, updated_menu: dict):
+        menu = await self.session.get(Menu, menu_id)
 
-    def update_menu(self, menu_id: str, updated_menu: dict):
-        menu = self.session.query(Menu).get(menu_id)
+        if menu:
+            # Изменим текущее меню на основе принятого измененного updated_menu
+            for key, value in updated_menu.dict(exclude_unset=True).items():
+                setattr(menu, key, value)  # Меняем значение аттрибута menu по его имени key на значение value
 
-        if not menu:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="menu not found")
-
-        for key, value in updated_menu.dict(exclude_unset=True).items():
-            setattr(menu, key, value)
-
-        self.session.commit()
-        self.session.refresh(menu)
-        return menu
-
-    def delete_menu(self, menu_id: str):
-        menu = self.session.query(Menu).get(menu_id)
-        if not menu:
+            await self.session.commit()
+            await self.session.refresh(menu)
+            return menu
+        else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="menu not found")
-        self.session.delete(menu)
-        self.session.commit()
-        return menu
 
-
-
-
+    async def delete_menu(self, menu_id: str):
+        menu = await self.session.get(Menu, menu_id)
+        if menu:
+            await self.session.delete(menu)
+            await self.session.commit()
+            return menu
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="menu not found")
