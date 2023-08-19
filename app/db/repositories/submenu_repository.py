@@ -1,7 +1,8 @@
 import uuid
 from typing import List
 
-from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, distinct
 from fastapi import HTTPException, status, Depends
 
@@ -10,18 +11,23 @@ from app.models.domain.menus_models import Submenu, Dish
 
 
 class AsyncSubmenuRepository:
-    def __init__(self, session: Session = Depends(get_async_session)):
+    def __init__(self, session: AsyncSession = Depends(get_async_session)):
         self.session = session
 
+    # Доработать репозиторий, подменю с одинаковыми названиями не должно быть
     async def create_submenu(self, menu_id: str, submenu):
-        submenu_obj = Submenu(title=submenu.title,
-                              description=submenu.description,
-                              menu_id=menu_id)
-        submenu_obj.id = str(uuid.uuid4())
-        self.session.add(submenu_obj)  # Добавляем сформированный объект в сессию
-        await self.session.commit()
-        await self.session.refresh(submenu_obj)
-        return submenu_obj
+        try:
+            submenu_obj = Submenu(title=submenu.title,
+                                  description=submenu.description,
+                                  menu_id=menu_id)
+            submenu_obj.id = str(uuid.uuid4())
+            self.session.add(submenu_obj)  # Добавляем сформированный объект в сессию
+            await self.session.commit()
+            await self.session.refresh(submenu_obj)
+            return submenu_obj
+        except IntegrityError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="submenu with this title already exists")
 
     async def read_all_submenus(self) -> List[Submenu]:
         query = await self.session.execute(
@@ -81,5 +87,5 @@ class AsyncSubmenuRepository:
             await self.session.commit()
             return submenu
         else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="submenu not found")
-
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="submenu not found")
