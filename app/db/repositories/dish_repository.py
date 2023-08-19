@@ -1,7 +1,8 @@
 import uuid
 from typing import List
 
-from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status, Depends
 
@@ -10,20 +11,24 @@ from app.models.domain.menus_models import Dish
 
 
 class AsyncDishRepository:
-    def __init__(self, session: Session = Depends(get_async_session)):
+    def __init__(self, session: AsyncSession = Depends(get_async_session)):
         self.session = session
 
+    # Доработать репозиторий, не должно быть блюд с одинаковыми названиями
     async def create_dish(self, submenu_id: str, dish):
-        dish_obj = Dish(title=dish.title,
-                        description=dish.description,
-                        submenu_id=submenu_id,
-                        price=dish.price)
-        dish_obj.id = str(uuid.uuid4())
-        self.session.add(dish_obj)
-        await self.session.commit()
-        await self.session.refresh(dish_obj)
-
-        return dish_obj
+        try:
+            dish_obj = Dish(title=dish.title,
+                            description=dish.description,
+                            submenu_id=submenu_id,
+                            price=dish.price)
+            dish_obj.id = str(uuid.uuid4())
+            self.session.add(dish_obj)
+            await self.session.commit()
+            await self.session.refresh(dish_obj)
+            return dish_obj
+        except IntegrityError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="dish with this title already exists")
 
     async def read_all_dishes(self) -> List[Dish]:
         query = await self.session.execute(
@@ -48,7 +53,6 @@ class AsyncDishRepository:
                 Dish.price
             )
             .filter(Dish.id == dish_id)
-            # .group_by(Dish.id)
         )
 
         item: Dish = query.first()
