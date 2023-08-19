@@ -17,3 +17,4 @@ DOCKER_URL = "http://api:8000/api/v1"
 # Переменные для подключения к Redis
 REDIS_HOST = os.environ.get("REDIS_HOST")
 REDIS_PORT = os.environ.get("REDIS_PORT")
+REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
