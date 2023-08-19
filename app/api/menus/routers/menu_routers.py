@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends
 from typing import List
 from starlette import status
 
-from app.models.schemas.menus.menu_schemas import MenuSchema, MenuResponse, MenuCountResponse
+from app.models.schemas.menus.menu_schemas import (
+    MenuSchema,
+    MenuResponse,
+    MenuCountResponse
+)
 from app.api.menus.services.menu_service import AsyncMenuService
 
 menu_router = APIRouter(

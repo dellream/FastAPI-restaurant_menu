@@ -11,11 +11,13 @@ from app.models.domain.menus_models import Dish
 
 
 class AsyncDishRepository:
+    """Репозиторий необходимых CRUD операций для модели Блюда"""
     def __init__(self, session: AsyncSession = Depends(get_async_session)):
         self.session = session
 
     # Доработать репозиторий, не должно быть блюд с одинаковыми названиями
     async def create_dish(self, submenu_id: str, dish):
+        """Добавление нового блюда"""
         try:
             dish_obj = Dish(title=dish.title,
                             description=dish.description,
@@ -31,6 +33,7 @@ class AsyncDishRepository:
                                 detail="dish with this title already exists")
 
     async def read_all_dishes(self) -> List[Dish]:
+        """Получение всех блюд"""
         query = await self.session.execute(
             select(
                 Dish.id,
@@ -45,6 +48,7 @@ class AsyncDishRepository:
         return query.all()
 
     async def read_dish(self, dish_id: str) -> Dish:
+        """Получение блюда по id"""
         query = await self.session.execute(
             select(
                 Dish.id,
@@ -64,6 +68,7 @@ class AsyncDishRepository:
                                 detail='dish not found')
 
     async def update_dish(self, dish_id: str, updated_dish: dict):
+        """Изменение блюда по id"""
         dish = await self.session.get(Dish, dish_id)
 
         if dish:
@@ -78,6 +83,7 @@ class AsyncDishRepository:
                                 detail="dish not found")
 
     async def delete_dish(self, dish_id: str):
+        """Удаление блюда по id"""
         dish = await self.session.get(Dish, dish_id)
         if dish:
             await self.session.delete(dish)

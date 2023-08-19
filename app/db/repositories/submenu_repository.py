@@ -11,11 +11,13 @@ from app.models.domain.menus_models import Submenu, Dish
 
 
 class AsyncSubmenuRepository:
+    """Репозиторий необходимых CRUD операций для модели Подменю"""
     def __init__(self, session: AsyncSession = Depends(get_async_session)):
         self.session = session
 
     # Доработать репозиторий, подменю с одинаковыми названиями не должно быть
     async def create_submenu(self, menu_id: str, submenu):
+        """Добавление нового подменю"""
         try:
             submenu_obj = Submenu(title=submenu.title,
                                   description=submenu.description,
@@ -30,6 +32,7 @@ class AsyncSubmenuRepository:
                                 detail="submenu with this title already exists")
 
     async def read_all_submenus(self) -> List[Submenu]:
+        """Получение всех подменю"""
         query = await self.session.execute(
             select(
                 Submenu.id,
@@ -45,6 +48,7 @@ class AsyncSubmenuRepository:
         return query.all()
 
     async def read_submenu(self, submenu_id: str) -> Submenu:
+        """Получение подменю по id"""
         query = await self.session.execute(
             select(
                 Submenu.id,
@@ -66,6 +70,7 @@ class AsyncSubmenuRepository:
                                 detail='submenu not found')
 
     async def update_submenu(self, submenu_id: str, updated_submenu: dict):
+        """Изменение подменю по id"""
         submenu = await self.session.get(Submenu, submenu_id)
 
         if submenu:
@@ -81,6 +86,7 @@ class AsyncSubmenuRepository:
                                 detail="submenu not found")
 
     async def delete_submenu(self, submenu_id: str):
+        """Удаление подменю по id"""
         submenu = await self.session.get(Submenu, submenu_id)
         if submenu:
             await self.session.delete(submenu)
