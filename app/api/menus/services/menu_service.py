@@ -24,7 +24,8 @@ class AsyncMenuService:
         if menu:
             return menu
         else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="menu not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="menu not found")
 
     async def update_menu(self, menu_id: str, updated_menu: MenuSchema):
         return await self.menu_repo.update_menu(menu_id, updated_menu)
