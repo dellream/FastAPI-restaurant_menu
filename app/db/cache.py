@@ -46,6 +46,16 @@ class CacheRepository:
         for key in await self.redis_cacher.keys(link + '*'):
             await self.redis_cacher.delete(key)
 
+    async def delete_list_cache(self,
+                                link):
+        """
+        Удаление записей из кеша по указанной ссылке.
+
+        :param link: Ссылка на ключ кеша, который нужно удалить.
+        :return: None
+        """
+        await self.redis_cacher.delete(link)
+
     async def set_all_dishes_cache(self,
                                    menu_id,
                                    submenu_id,
@@ -138,16 +148,17 @@ class CacheRepository:
 
         Если в БД происходит внесение изменений (в т.ч добавление нового блюда,
         изменение существующего блюда), то должно происходить обновление кеша
-        для всех блюд
+        для всех блюд, не задевая кеш для конкретных блюд
 
-        Происходит удаление кеша для всех блюд и повторная запись о всех блюдах.
+        Происходит удаление кеша для списка всех блюд и повторная запись о всех
+        блюдах.
 
         :param dish_list: Информация о всех блюдах.
         :param menu_id: ID меню.
         :param submenu_id: ID подменю.
         :return: None
         """
-        await self.delete_cache_by_mask(
+        await self.delete_list_cache(
             link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/'
         )
         await self.set_all_dishes_cache(
@@ -182,5 +193,3 @@ class CacheRepository:
             submenu_id=submenu_id,
             menu_id=menu_id,
         )
-
-
