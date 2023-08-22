@@ -32,7 +32,7 @@ class AsyncDishRepository:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="dish with this title already exists")
 
-    async def read_all_dishes(self) -> List[Dish]:
+    async def read_all_dishes(self, submenu_id) -> List[Dish]:
         """Получение всех блюд"""
         query = await self.session.execute(
             select(
@@ -42,6 +42,7 @@ class AsyncDishRepository:
                 Dish.price,
                 Dish.submenu_id,
             )
+            .where(Dish.submenu_id == submenu_id)
             .group_by(Dish.id)
         )
 

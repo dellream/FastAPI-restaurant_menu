@@ -14,7 +14,9 @@ class SubmenuSchema(SubmenuBase):
 
 class SubmenuResponse(SubmenuSchema):
     id: str
+    menu_id: str
 
 
-class SubmenuCountResponse(SubmenuResponse):
+class SubmenuCountResponse(SubmenuSchema):
+    id: str
     dishes_count: int

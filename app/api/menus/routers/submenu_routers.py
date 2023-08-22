@@ -26,8 +26,9 @@ async def create_submenus(submenu: SubmenuSchema,
 
 @submenu_router.get("/",
                     response_model=List[SubmenuResponse])
-async def read_all_submenus(submenu_service: AsyncSubmenuService = Depends()):
-    return await submenu_service.read_all_submenus()
+async def read_all_submenus(menu_id: str,
+                            submenu_service: AsyncSubmenuService = Depends()):
+    return await submenu_service.read_all_submenus(menu_id)
 
 
 @submenu_router.get("/{submenu_id}/",

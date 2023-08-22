@@ -1,10 +1,10 @@
-import json
+import pickle
 
-import redis
 from fastapi import Depends
 
 from app.config import EXPIRATION
 from app.db.database_connect import get_redis
+from app.db.repositories.submenu_repository import AsyncSubmenuRepository
 
 
 class CacheRepository:
@@ -57,7 +57,6 @@ class CacheRepository:
         await self.redis_cacher.delete(link)
 
     async def set_all_dishes_cache(self,
-                                   menu_id,
                                    submenu_id,
                                    dish_list):
         """
@@ -70,14 +69,15 @@ class CacheRepository:
 
         Время жизни данного кеша ограничено переменной app.config.EXPIRATION.
 
-        :param menu_id: Идентификатор меню.
         :param submenu_id: Идентификатор подменю.
         :param dish_list: Список блюд для сохранения в кеш.
         :return: None.
         """
+        submenu_service = AsyncSubmenuRepository()
+        menu_id = await submenu_service.read_submenu(submenu_id)
         await self.redis_cacher.set(
             f'/menus/{menu_id}/submenus/{submenu_id}/dishes',
-            json.dumps(dish_list),
+            pickle.dumps(dish_list),
             ex=EXPIRATION
         )
 
@@ -98,7 +98,7 @@ class CacheRepository:
             f'/menus/{menu_id}/submenus/{submenu_id}/dishes'
         )
         if cache:
-            dish_list = json.loads(cache)
+            dish_list = pickle.loads(cache)
             return dish_list
         return None
 
@@ -116,7 +116,7 @@ class CacheRepository:
         """
         await self.redis_cacher.set(
             f'/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_info.id}',
-            json.dumps(dish_info),
+            pickle.dumps(dish_info),
             ex=EXPIRATION
         )
 
@@ -136,13 +136,13 @@ class CacheRepository:
             f'/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}',
         )
         if cache:
-            return json.loads(cache)
+            return pickle.loads(cache)
         return None
 
     async def create_new_dish_cache(self,
                                     dish_list,
-                                    menu_id,
-                                    submenu_id):
+                                    submenu_id,
+                                    dish_service):
         """
         Создание новой записи о блюде в кеше.
 
@@ -153,18 +153,18 @@ class CacheRepository:
         Происходит удаление кеша для списка всех блюд и повторная запись о всех
         блюдах.
 
+        :param submenu_service: Уже созданный экземпляр класса AsyncSubmenuRepository
         :param dish_list: Информация о всех блюдах.
-        :param menu_id: ID меню.
         :param submenu_id: ID подменю.
         :return: None
         """
+        menu_id = await dish_service.read_dish(submenu_id)
         await self.delete_list_cache(
             link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/'
         )
         await self.set_all_dishes_cache(
             dish_list=dish_list,
             submenu_id=submenu_id,
-            menu_id=menu_id
         )
 
     async def update_dish_cache(self,

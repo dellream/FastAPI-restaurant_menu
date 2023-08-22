@@ -17,9 +17,10 @@ class AsyncSubmenuService:
         """Добавление нового подменю"""
         return await self.submenu_repo.create_submenu(menu_id, submenu)
 
-    async def read_all_submenus(self):
+    async def read_all_submenus(self,
+                                menu_id):
         """Получение всех подменю"""
-        return await self.submenu_repo.read_all_submenus()
+        return await self.submenu_repo.read_all_submenus(menu_id)
 
     async def read_submenu(self,
                            submenu_id: str):

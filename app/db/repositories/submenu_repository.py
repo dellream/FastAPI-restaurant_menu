@@ -31,7 +31,7 @@ class AsyncSubmenuRepository:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="submenu with this title already exists")
 
-    async def read_all_submenus(self) -> List[Submenu]:
+    async def read_all_submenus(self, menu_id) -> List[Submenu]:
         """Получение всех подменю"""
         query = await self.session.execute(
             select(
@@ -42,12 +42,14 @@ class AsyncSubmenuRepository:
                 func.count(Dish.id).label('dishes_count')
             )
             .outerjoin(Dish, Submenu.id == Dish.submenu_id)
+            .where(Submenu.menu_id == menu_id)
             .group_by(Submenu.id)
         )
 
         return query.all()
 
-    async def read_submenu(self, submenu_id: str) -> Submenu:
+    async def read_submenu(self,
+                           submenu_id: str) -> Submenu:
         """Получение подменю по id"""
         query = await self.session.execute(
             select(
@@ -57,7 +59,7 @@ class AsyncSubmenuRepository:
                 func.count(distinct(Dish.id)).label('dishes_count')
             )
             .outerjoin(Dish, Submenu.id == Dish.submenu_id)
-            .filter(Submenu.id == submenu_id)
+            .where(Submenu.id == submenu_id)
             .group_by(Submenu.id)
         )
 
