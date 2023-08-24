@@ -58,7 +58,8 @@ class CacheRepository:
 
     async def set_all_dishes_cache(self,
                                    submenu_id,
-                                   dish_list):
+                                   dish_list,
+                                   menu_id):
         """
         Запись всех блюд в кеш.
 
@@ -69,12 +70,11 @@ class CacheRepository:
 
         Время жизни данного кеша ограничено переменной app.config.EXPIRATION.
 
+        :param menu_id: ID меню у подменю для данного блюда.
         :param submenu_id: Идентификатор подменю.
         :param dish_list: Список блюд для сохранения в кеш.
         :return: None.
         """
-        submenu_service = AsyncSubmenuRepository()
-        menu_id = await submenu_service.read_submenu(submenu_id)
         await self.redis_cacher.set(
             f'/menus/{menu_id}/submenus/{submenu_id}/dishes',
             pickle.dumps(dish_list),
@@ -142,7 +142,7 @@ class CacheRepository:
     async def create_new_dish_cache(self,
                                     dish_list,
                                     submenu_id,
-                                    dish_service):
+                                    menu_id):
         """
         Создание новой записи о блюде в кеше.
 
@@ -153,18 +153,18 @@ class CacheRepository:
         Происходит удаление кеша для списка всех блюд и повторная запись о всех
         блюдах.
 
-        :param submenu_service: Уже созданный экземпляр класса AsyncSubmenuRepository
+        :param menu_id: ID меню у подменю для данного блюда
         :param dish_list: Информация о всех блюдах.
         :param submenu_id: ID подменю.
         :return: None
         """
-        menu_id = await dish_service.read_dish(submenu_id)
         await self.delete_list_cache(
-            link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/'
+            link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes'
         )
         await self.set_all_dishes_cache(
             dish_list=dish_list,
             submenu_id=submenu_id,
+            menu_id=menu_id
         )
 
     async def update_dish_cache(self,

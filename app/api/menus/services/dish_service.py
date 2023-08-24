@@ -16,7 +16,6 @@ class AsyncDishService:
 
     async def create_dish(self,
                           submenu_id: str,
-                          dish_service,
                           dish: DishSchema,
                           background_tasks: BackgroundTasks):
         """
@@ -34,11 +33,12 @@ class AsyncDishService:
         :return: Информация о созданном блюде
         """
         dish_list = await self.dish_repo.create_dish(submenu_id, dish)
+        menu_id = await self.dish_repo.get_menu_id_by_submenu_id(submenu_id)
         background_tasks.add_task(
             self.cache_repo.create_new_dish_cache,
             dish_list=dish_list,
             submenu_id=submenu_id,
-            dish_service=dish_service
+            menu_id=menu_id
         )
         return dish_list
 

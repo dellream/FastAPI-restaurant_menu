@@ -7,11 +7,12 @@ from sqlalchemy import select
 from fastapi import HTTPException, status, Depends
 
 from app.db.database_connect import get_async_session
-from app.models.domain.menus_models import Dish
+from app.models.domain.menus_models import Dish, Submenu
 
 
 class AsyncDishRepository:
     """Репозиторий необходимых CRUD операций для модели Блюда"""
+
     def __init__(self, session: AsyncSession = Depends(get_async_session)):
         self.session = session
 
@@ -93,3 +94,28 @@ class AsyncDishRepository:
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="dish not found")
+
+    async def get_menu_id_by_submenu_id(self,
+                                        submenu_id):
+        """
+        Получение menu_id по идентификатору подменю
+
+        :param submenu_id: ID подменю
+        :return: Возвращает menu_id, в котором хранится блюдо
+        """
+        query = await self.session.execute(
+            select(Submenu.menu_id)
+            .select_from(Dish)
+            .join(Submenu, Dish.submenu_id == Submenu.id)
+            .where(Dish.submenu_id == submenu_id)
+            .limit(1)
+        )
+
+        # Получаем значение из первой колонки первой строки
+        menu_id = query.scalar()
+
+        if menu_id:
+            return menu_id
+        else:
+            raise HTTPException(status.HTTP_404_NOT_FOUND,
+                                detail='Номер меню у данного блюда не найден')
