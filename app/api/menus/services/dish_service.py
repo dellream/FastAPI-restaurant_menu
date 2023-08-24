@@ -32,15 +32,15 @@ class AsyncDishService:
         :param background_tasks: Фоновая задача
         :return: Информация о созданном блюде
         """
-        dish_list = await self.dish_repo.create_dish(submenu_id, dish)
+        dish_info = await self.dish_repo.create_dish(submenu_id, dish)
         menu_id = await self.dish_repo.get_menu_id_by_submenu_id(submenu_id)
         background_tasks.add_task(
             self.cache_repo.create_new_dish_cache,
-            dish_list=dish_list,
+            dish_info=dish_info,
             submenu_id=submenu_id,
             menu_id=menu_id
         )
-        return dish_list
+        return dish_info
 
     async def read_all_dishes(self,
                               menu_id,
@@ -77,21 +77,54 @@ class AsyncDishService:
         return dish_list
 
     async def read_dish(self,
+                        menu_id: str,
+                        submenu_id: str,
                         dish_id: str,
                         background_tasks: BackgroundTasks):
         """Получение блюд по id"""
-        dish = await self.dish_repo.read_dish(dish_id)
-        return dish
+        cache = await self.cache_repo.get_dish_cache(
+            menu_id=menu_id,
+            submenu_id=submenu_id,
+            dish_id=dish_id
+        )
+        if cache:
+            return cache
+        dish_info = await self.dish_repo.read_dish(dish_id)
+        background_tasks.add_task(
+            self.cache_repo.set_dish_cache,
+            menu_id=menu_id,
+            submenu_id=submenu_id,
+            dish_info=dish_info
+        )
+        return dish_info
 
     async def update_dish(self,
+                          menu_id: str,
+                          submenu_id: str,
                           dish_id: str,
                           updated_dish: DishSchema,
                           background_tasks: BackgroundTasks):
         """Изменение блюд по id"""
-        return await self.dish_repo.update_dish(dish_id, updated_dish)
+        dish = await self.dish_repo.update_dish(dish_id, updated_dish)
+        background_tasks.add_task(
+            self.cache_repo.update_dish_cache,
+            dish_info=dish,
+            menu_id=menu_id,
+            submenu_id=submenu_id
+        )
+        return dish
 
     async def delete_dish(self,
+                          menu_id: str,
+                          submenu_id: str,
                           dish_id: str,
                           background_tasks: BackgroundTasks):
         """Удаление блюд по id"""
-        return await self.dish_repo.delete_dish(dish_id)
+        dish = await self.dish_repo.delete_dish(dish_id=dish_id)
+        background_tasks.add_task(
+            self.cache_repo.delete_dish_cache,
+            menu_id=menu_id,
+            submenu_id=submenu_id,
+            dish_id=dish_id
+        )
+        return dish

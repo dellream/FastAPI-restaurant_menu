@@ -63,10 +63,10 @@ class CacheRepository:
         """
         Запись всех блюд в кеш.
 
-        Ключ в Redis будет представлен в виде строки-ссылки на список всех блюд, сформированной
-        на основе указанных menu_id и submenu_id.
+        Ключ в Redis будет представлен в виде строки-ссылки на список всех блюд,
+        сформированной на основе указанных menu_id и submenu_id.
 
-        Значение в кеше будет представлять список блюд в формате JSON.
+        Значение в кеше будет представлять список блюд в формате pickle.
 
         Время жизни данного кеша ограничено переменной app.config.EXPIRATION.
 
@@ -140,7 +140,7 @@ class CacheRepository:
         return None
 
     async def create_new_dish_cache(self,
-                                    dish_list,
+                                    dish_info,
                                     submenu_id,
                                     menu_id):
         """
@@ -150,21 +150,21 @@ class CacheRepository:
         изменение существующего блюда), то должно происходить обновление кеша
         для всех блюд, не задевая кеш для конкретных блюд
 
-        Происходит удаление кеша для списка всех блюд и повторная запись о всех
-        блюдах.
+        Происходит удаление кеша для списка всех блюд, и создается кеш для создаваемого
+        блюда.
 
         :param menu_id: ID меню у подменю для данного блюда
-        :param dish_list: Информация о всех блюдах.
+        :param dish_info: Информация о создаваемом блюде.
         :param submenu_id: ID подменю.
         :return: None
         """
         await self.delete_list_cache(
             link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes'
         )
-        await self.set_all_dishes_cache(
-            dish_list=dish_list,
+        await self.set_dish_cache(
+            menu_id=menu_id,
             submenu_id=submenu_id,
-            menu_id=menu_id
+            dish_info=dish_info
         )
 
     async def update_dish_cache(self,
@@ -192,4 +192,20 @@ class CacheRepository:
             dish_info=dish_info,
             submenu_id=submenu_id,
             menu_id=menu_id,
+        )
+
+    async def delete_dish_cache(self,
+                                menu_id: str,
+                                submenu_id: str,
+                                dish_id: str):
+        """
+        Удаление кеша в связи с удалением блюда из БД
+
+        :param menu_id: ID меню
+        :param submenu_id: ID подменю
+        :param dish_id: ID блюда
+        :return: None
+        """
+        await self.delete_cache_by_mask(
+            link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}'
         )

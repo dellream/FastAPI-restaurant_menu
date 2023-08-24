@@ -1,3 +1,4 @@
+import time
 import uuid
 from typing import List
 
@@ -46,7 +47,6 @@ class AsyncDishRepository:
             .where(Dish.submenu_id == submenu_id)
             .group_by(Dish.id)
         )
-
         return query.all()
 
     async def read_dish(self, dish_id: str) -> Dish:

@@ -22,8 +22,7 @@ async def create_dish(background_tasks: BackgroundTasks,
     return await dish_service.create_dish(
         submenu_id=submenu_id,
         dish=dish,
-        background_tasks=background_tasks,
-        dish_service=dish_service
+        background_tasks=background_tasks
     )
 
 
@@ -52,23 +51,45 @@ async def read_all_dishes(background_tasks: BackgroundTasks,
 @dish_router.get("/{dish_id}/",
                  response_model=DishResponse)
 async def read_dish(background_tasks: BackgroundTasks,
+                    menu_id: str,
+                    submenu_id: str,
                     dish_id: str,
                     dish_service: AsyncDishService = Depends()):
-    return await dish_service.read_dish(dish_id)
+    return await dish_service.read_dish(
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+        dish_id=dish_id,
+        background_tasks=background_tasks
+    )
 
 
 @dish_router.patch("/{dish_id}/",
                    response_model=DishResponse)
 async def update_dish(background_tasks: BackgroundTasks,
+                      menu_id: str,
+                      submenu_id: str,
                       dish_id: str,
                       updated_dish: DishSchema,
                       dish_service: AsyncDishService = Depends()):
-    return await dish_service.update_dish(dish_id, updated_dish)
+    return await dish_service.update_dish(
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+        dish_id=dish_id,
+        updated_dish=updated_dish,
+        background_tasks=background_tasks
+    )
 
 
 @dish_router.delete("/{dish_id}/",
                     response_model=DishResponse)
 async def delete_dish(background_tasks: BackgroundTasks,
+                      menu_id: str,
+                      submenu_id: str,
                       dish_id: str,
                       dish_service: AsyncDishService = Depends()):
-    return await dish_service.delete_dish(dish_id)
+    return await dish_service.delete_dish(
+        dish_id=dish_id,
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+        background_tasks=background_tasks
+    )
