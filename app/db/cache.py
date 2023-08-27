@@ -39,6 +39,25 @@ class CacheRepository:
         """
         await self.redis_cacher.delete(link)
 
+    async def delete_cache_except_dish_keys(self):
+        """
+        Удаление всех записей из кеша, кроме ключей для конкретных блюд.
+
+        :return: None
+        """
+        all_keys = await self.redis_cacher.keys('*')
+
+        dish_keys_to_keep = set()
+        for key in all_keys:
+            key_str = key.decode('utf-8')
+            if '/dishes/' in key_str:
+                dish_keys_to_keep.add(key)
+
+        keys_to_delete = [key for key in all_keys if key not in dish_keys_to_keep]
+
+        for key in keys_to_delete:
+            await self.redis_cacher.delete(key)
+
     async def set_all_dishes_cache(self,
                                    submenu_id,
                                    dish_list,
@@ -141,9 +160,7 @@ class CacheRepository:
         :param submenu_id: ID подменю.
         :return: None
         """
-        await self.delete_cache_by_mask(
-            link=f'/menus/'
-        )
+        await self.delete_cache_except_dish_keys()
         await self.set_dish_cache(
             menu_id=menu_id,
             submenu_id=submenu_id,
@@ -193,7 +210,6 @@ class CacheRepository:
             link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}'
         )
 
-    ###########################################################################
     async def get_all_submenus_cache(self,
                                      menu_id):
         """
@@ -286,9 +302,7 @@ class CacheRepository:
         :param submenu_info: Информация о создаваемом подменю.
         :return: None
         """
-        await self.delete_cache_by_mask(
-            link=f'/menus/'
-        )
+        await self.delete_cache_except_dish_keys()
         await self.set_submenu_cache(
             submenu_info=submenu_info,
             menu_id=menu_id,
@@ -332,8 +346,6 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}'
         )
-
-    ###########################################################################
 
     async def get_all_menus_cache(self):
         """

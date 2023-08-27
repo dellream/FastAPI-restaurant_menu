@@ -50,6 +50,7 @@ class AsyncMenuService:
         menu_info = await self.menu_repo.read_menu(menu_id)
         background_tasks.add_task(
             self.cache_repo.set_menu_cache,
+            menu_id,
             menu_info
         )
         return menu_info
