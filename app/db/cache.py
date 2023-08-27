@@ -141,8 +141,8 @@ class CacheRepository:
         :param submenu_id: ID подменю.
         :return: None
         """
-        await self.delete_list_cache(
-            link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes'
+        await self.delete_cache_by_mask(
+                link=f'/menus/{menu_id}/'
         )
         await self.set_dish_cache(
             menu_id=menu_id,
