@@ -42,10 +42,12 @@ async def read_all_submenus(menu_id: str,
 
 @submenu_router.get("/{submenu_id}/",
                     response_model=SubmenuCountResponse)
-async def read_submenu(submenu_id: str,
+async def read_submenu(menu_id: str,
+                       submenu_id: str,
                        background_tasks: BackgroundTasks,
                        submenu_service: AsyncSubmenuService = Depends()):
     return await submenu_service.read_submenu(
+        menu_id=menu_id,
         submenu_id=submenu_id,
         background_tasks=background_tasks
     )
@@ -53,11 +55,13 @@ async def read_submenu(submenu_id: str,
 
 @submenu_router.patch("/{submenu_id}/",
                       response_model=SubmenuResponse)
-async def update_submenu(submenu_id: str,
+async def update_submenu(menu_id: str,
+                         submenu_id: str,
                          background_tasks: BackgroundTasks,
                          updated_submenu: SubmenuSchema,
                          submenu_service: AsyncSubmenuService = Depends()):
     return await submenu_service.update_submenu(
+        menu_id=menu_id,
         submenu_id=submenu_id,
         updated_submenu=updated_submenu,
         background_tasks=background_tasks
@@ -66,10 +70,12 @@ async def update_submenu(submenu_id: str,
 
 @submenu_router.delete("/{submenu_id}/",
                        response_model=SubmenuResponse)
-async def delete_submenu(submenu_id: str,
+async def delete_submenu(menu_id: str,
+                         submenu_id: str,
                          background_tasks: BackgroundTasks,
                          submenu_service: AsyncSubmenuService = Depends()):
     return await submenu_service.delete_submenu(
+        menu_id=menu_id,
         submenu_id=submenu_id,
         background_tasks=background_tasks
     )

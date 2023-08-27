@@ -192,3 +192,143 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}'
         )
+
+    ###########################################################################
+    async def get_all_submenus_cache(self,
+                                     menu_id):
+        """
+        Получение всех подменю из кеша.
+
+        Из Redis извлекается сериализованный pickle объект данных.
+        Для получения оригинальных данных, этот pickle объект десериализуется.
+
+        :param menu_id: Идентификатор меню.
+        :return: Список подменю из кеша, либо None, если кеш не существует.
+        """
+        cache = await self.redis_cacher.get(
+            f'/menus/{menu_id}/submenus/'
+        )
+        if cache:
+            return pickle.loads(cache)
+        return None
+
+    async def set_all_submenus_cache(self,
+                                     menu_id,
+                                     submenu_list):
+        """
+        Запись всех подменю в кеш.
+
+        Ключ в Redis будет представлен в виде строки-ссылки на список всех блюд,
+        сформированной на основе указанного menu_id.
+
+        Значение в кеше будет представлять список блюд в формате pickle.
+
+        Время жизни данного кеша ограничено переменной app.config.EXPIRATION.
+
+        :param menu_id: ID меню для данного подменю .
+        :param submenu_list: Список подменю для сохранения в кеш.
+        :return: None.
+        """
+        await self.redis_cacher.set(
+            f'/menus/{menu_id}/submenus',
+            pickle.dumps(submenu_list),
+            ex=EXPIRATION
+        )
+
+    async def get_submenu_cache(self,
+                                menu_id,
+                                submenu_id):
+        """
+        Получение информации об одном подменю из кеша
+
+        :param menu_id: ID меню, в котором находится искомое подменю.
+        :param submenu_id: ID получаемого подменю.
+        :return: Информация о подменю или None, если нет в кеше.
+        """
+        cache = await self.redis_cacher.get(
+            f'/menus/{menu_id}/submenus/{submenu_id}'
+        )
+        if cache:
+            return pickle.loads(cache)
+        return None
+
+    async def set_submenu_cache(self,
+                                menu_id,
+                                submenu_id,
+                                submenu_info):
+        """
+        Запись информации о подменю в кеш
+
+        :param submenu_info: Информация о подменю.
+        :return: None.
+        """
+        await self.redis_cacher.set(
+            f'/menus/{menu_id}/submenus/{submenu_id}',
+            pickle.dumps(submenu_info),
+            ex=EXPIRATION
+        )
+
+    async def create_new_submenu_cache(self,
+                                       submenu_info,
+                                       menu_id,
+                                       submenu_id):
+        """
+        Создание новой записи о подменю в кеше.
+
+        Если в БД происходит внесение изменений (в т.ч добавление нового подменю),
+        то должно происходить обновление кеша для всех подменю, не задевая кеш для
+        конкретных подменю
+
+        Происходит удаление кеша для списка всех подменю, и создается кеш для создаваемого
+        подменю.
+
+        :param menu_id: ID меню у данного подменю
+        :param submenu_info: Информация о создаваемом подменю.
+        :return: None
+        """
+        await self.delete_list_cache(
+            link=f'/menus/{menu_id}/submenus/'
+        )
+        await self.set_submenu_cache(
+            submenu_info=submenu_info,
+            menu_id=menu_id,
+            submenu_id=submenu_id
+        )
+
+    async def update_submenu_cache(self,
+                                   submenu_info,
+                                   menu_id: str,
+                                   submenu_id: str):
+        """
+        Обновление кеша конкретного подменю при изменении этого подменю в БД.
+
+        Если в БД происходит внесение изменений (в т.ч изменение существующего подменю),
+        то должно происходить обновление кеша для данного конкретного подменю
+
+        Происходит удаление кеша для данного подменю, повторное создание кеша для данного
+        подменю.
+
+        :param submenu_info: Информация о подменю.
+        :return: None
+        """
+        await self.delete_cache_by_mask(
+            link=f'/menus/{submenu_info.menu_id}/submenus/{submenu_info.id}'
+        )
+        await self.set_submenu_cache(
+            submenu_info=submenu_info,
+            menu_id=menu_id,
+            submenu_id=submenu_id
+        )
+
+    async def delete_submenu_cache(self,
+                                   menu_id,
+                                   submenu_id):
+        """
+        Удаление кеша в связи с удалением блюда из БД
+
+        :param submenu_info: Информация об удаляемом подменю
+        :return: None
+        """
+        await self.delete_cache_by_mask(
+            link=f'/menus/{menu_id}/submenus/{submenu_id}'
+        )
