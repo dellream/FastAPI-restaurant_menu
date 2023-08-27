@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from typing import List
 from starlette import status
 
@@ -20,34 +20,56 @@ submenu_router = APIRouter(
                      status_code=status.HTTP_201_CREATED)
 async def create_submenus(submenu: SubmenuSchema,
                           menu_id: str,
+                          background_tasks: BackgroundTasks,
                           submenu_service: AsyncSubmenuService = Depends()):
-    return await submenu_service.create_submenu(menu_id, submenu)
+    return await submenu_service.create_submenu(
+        menu_id=menu_id,
+        submenu=submenu,
+        background_tasks=background_tasks
+    )
 
 
 @submenu_router.get("/",
                     response_model=List[SubmenuResponse])
 async def read_all_submenus(menu_id: str,
+                            background_tasks: BackgroundTasks,
                             submenu_service: AsyncSubmenuService = Depends()):
-    return await submenu_service.read_all_submenus(menu_id)
+    return await submenu_service.read_all_submenus(
+        menu_id=menu_id,
+        background_tasks=background_tasks
+    )
 
 
 @submenu_router.get("/{submenu_id}/",
                     response_model=SubmenuCountResponse)
 async def read_submenu(submenu_id: str,
+                       background_tasks: BackgroundTasks,
                        submenu_service: AsyncSubmenuService = Depends()):
-    return await submenu_service.read_submenu(submenu_id)
+    return await submenu_service.read_submenu(
+        submenu_id=submenu_id,
+        background_tasks=background_tasks
+    )
 
 
 @submenu_router.patch("/{submenu_id}/",
                       response_model=SubmenuResponse)
 async def update_submenu(submenu_id: str,
+                         background_tasks: BackgroundTasks,
                          updated_submenu: SubmenuSchema,
                          submenu_service: AsyncSubmenuService = Depends()):
-    return await submenu_service.update_submenu(submenu_id, updated_submenu)
+    return await submenu_service.update_submenu(
+        submenu_id=submenu_id,
+        updated_submenu=updated_submenu,
+        background_tasks=background_tasks
+    )
 
 
 @submenu_router.delete("/{submenu_id}/",
                        response_model=SubmenuResponse)
 async def delete_submenu(submenu_id: str,
+                         background_tasks: BackgroundTasks,
                          submenu_service: AsyncSubmenuService = Depends()):
-    return await submenu_service.delete_submenu(submenu_id)
+    return await submenu_service.delete_submenu(
+        submenu_id=submenu_id,
+        background_tasks=background_tasks
+    )
