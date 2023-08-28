@@ -68,22 +68,20 @@ class AsyncDishRepository:
             raise HTTPException(status.HTTP_404_NOT_FOUND,
                                 detail='dish not found')
 
-    async def update_dish(self, dish_id: str, updated_dish: dict):
+    async def update_dish(self, dish_id: str, updated_dish: DishSchema) -> Dish:
         """Изменение блюда по id"""
-        dish = await self.session.get(Dish, dish_id)
+        # Находим текущее блюдо в бд
+        current_dish = await self.session.get(Dish, dish_id)
 
-        if dish:
-            # Изменим текущее блюдо на основе принятого измененного updated_dish
-            updated_dish_model = DishSchema(**updated_dish)  # Создаем экземпляр модели Pydantic
-            updated_dish_dict = updated_dish_model.dict(exclude_unset=True)  # Преобразуем модель в словарь
+        if current_dish:
+            current_dish.title = updated_dish.title
+            current_dish.description = updated_dish.description
+            current_dish.price = updated_dish.price
 
-            # Изменим текущее подменю на основе принятого измененного updated_submenu
-            for key, value in updated_dish_dict.items():
-                setattr(dish, key, value)
-
+            await self.session.merge(current_dish)
             await self.session.commit()
-            await self.session.refresh(dish)
-            return dish
+            await self.session.refresh(current_dish)
+            return current_dish
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail='dish not found')

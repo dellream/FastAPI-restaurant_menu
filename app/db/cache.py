@@ -326,7 +326,7 @@ class CacheRepository:
         :return: None
         """
         await self.delete_cache_by_mask(
-            link=f'/menus/{submenu_info.menu_id}/submenus/{submenu_info.id}'
+            link=f'/menus/{menu_id}/submenus/{submenu_id}'
         )
         await self.set_submenu_cache(
             submenu_info=submenu_info,

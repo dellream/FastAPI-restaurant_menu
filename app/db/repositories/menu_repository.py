@@ -70,22 +70,18 @@ class AsyncMenuRepository:
             raise HTTPException(status.HTTP_404_NOT_FOUND,
                                 detail='menu not found')
 
-    async def update_menu(self, menu_id: str, updated_menu: dict):
+    async def update_menu(self, menu_id: str, updated_menu: MenuSchema):
         """Изменение меню по id"""
-        menu = await self.session.get(Menu, menu_id)
+        current_menu = await self.session.get(Menu, menu_id)
 
-        if menu:
-            # Изменим текущее меню на основе принятого измененного updated_menu
-            updated_menu_model = MenuSchema(**updated_menu)  # Создаем экземпляр модели Pydantic
-            updated_menu_dict = updated_menu_model.dict(exclude_unset=True)  # Преобразуем модель в словарь
+        if current_menu:
+            current_menu.title = updated_menu.title
+            current_menu.description = updated_menu.description
 
-            # Изменим текущее меню на основе принятого измененного updated_submenu
-            for key, value in updated_menu_dict.items():
-                setattr(menu, key, value)  # Меняем значение аттрибута menu по его имени key на значение value
-
+            await self.session.merge(current_menu)
             await self.session.commit()
-            await self.session.refresh(menu)
-            return menu
+            await self.session.refresh(current_menu)
+            return current_menu
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail='menu not found')

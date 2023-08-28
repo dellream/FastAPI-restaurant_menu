@@ -74,22 +74,18 @@ class AsyncSubmenuRepository:
 
     async def update_submenu(self,
                              submenu_id: str,
-                             updated_submenu: dict):
+                             updated_submenu: SubmenuSchema):
         """Изменение подменю по id"""
-        submenu = await self.session.get(Submenu, submenu_id)
+        current_submenu = await self.session.get(Submenu, submenu_id)
 
-        if submenu:
-            # Изменим текущее подменю на основе принятого измененного updated_submenu
-            updated_submenu_model = SubmenuSchema(**updated_submenu)  # Создаем экземпляр модели Pydantic
-            updated_submenu_dict = updated_submenu_model.dict(exclude_unset=True)  # Преобразуем модель в словарь
+        if current_submenu:
+            current_submenu.title = updated_submenu.title
+            current_submenu.description = updated_submenu.description
 
-            # Изменим текущее подменю на основе принятого измененного updated_submenu
-            for key, value in updated_submenu_dict.items():
-                setattr(submenu, key, value)  # Меняем значение аттрибута menu по его имени key на значение value
-
+            await self.session.merge(current_submenu)
             await self.session.commit()
-            await self.session.refresh(submenu)
-            return submenu
+            await self.session.refresh(current_submenu)
+            return current_submenu
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail='submenu not found')
