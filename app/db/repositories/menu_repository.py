@@ -1,13 +1,13 @@
 import uuid
-from typing import List
 
+from fastapi import Depends, HTTPException, status
+from sqlalchemy import distinct, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, distinct
-from fastapi import HTTPException, status, Depends
 
 from app.db.database_connect import get_async_session
-from app.models.domain.menus_models import Menu, Submenu, Dish
+from app.models.domain.menus_models import Dish, Menu, Submenu
+from app.models.schemas.menus.menu_schemas import MenuSchema
 
 
 class AsyncMenuRepository:
@@ -29,9 +29,9 @@ class AsyncMenuRepository:
             return menu_obj
         except IntegrityError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Menu with this title is already exists")
+                                detail='Menu with this title is already exists')
 
-    async def read_all_menus(self) -> List[Menu]:
+    async def read_all_menus(self) -> list[Menu]:
         """Получение всех меню"""
         query = await self.session.execute(
             select(
@@ -76,7 +76,11 @@ class AsyncMenuRepository:
 
         if menu:
             # Изменим текущее меню на основе принятого измененного updated_menu
-            for key, value in updated_menu.dict(exclude_unset=True).items():
+            updated_menu_model = MenuSchema(**updated_menu)  # Создаем экземпляр модели Pydantic
+            updated_menu_dict = updated_menu_model.dict(exclude_unset=True)  # Преобразуем модель в словарь
+
+            # Изменим текущее меню на основе принятого измененного updated_submenu
+            for key, value in updated_menu_dict.items():
                 setattr(menu, key, value)  # Меняем значение аттрибута menu по его имени key на значение value
 
             await self.session.commit()
@@ -84,7 +88,7 @@ class AsyncMenuRepository:
             return menu
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="menu not found")
+                                detail='menu not found')
 
     async def delete_menu(self, menu_id: str):
         """Удаление меню по id"""
@@ -95,4 +99,4 @@ class AsyncMenuRepository:
             return menu
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="menu not found")
+                                detail='menu not found')

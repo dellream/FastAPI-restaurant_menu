@@ -1,14 +1,13 @@
-import time
 import uuid
-from typing import List
 
+from fastapi import Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from fastapi import HTTPException, status, Depends
 
 from app.db.database_connect import get_async_session
 from app.models.domain.menus_models import Dish, Submenu
+from app.models.schemas.menus.dish_schemas import DishSchema
 
 
 class AsyncDishRepository:
@@ -32,9 +31,9 @@ class AsyncDishRepository:
             return dish_obj
         except IntegrityError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="dish with this title already exists")
+                                detail='dish with this title already exists')
 
-    async def read_all_dishes(self, submenu_id) -> List[Dish]:
+    async def read_all_dishes(self, submenu_id) -> list[Dish]:
         """Получение всех блюд"""
         query = await self.session.execute(
             select(
@@ -74,7 +73,12 @@ class AsyncDishRepository:
         dish = await self.session.get(Dish, dish_id)
 
         if dish:
-            for key, value in updated_dish.dict(exclude_unset=True).items():
+            # Изменим текущее блюдо на основе принятого измененного updated_dish
+            updated_dish_model = DishSchema(**updated_dish)  # Создаем экземпляр модели Pydantic
+            updated_dish_dict = updated_dish_model.dict(exclude_unset=True)  # Преобразуем модель в словарь
+
+            # Изменим текущее подменю на основе принятого измененного updated_submenu
+            for key, value in updated_dish_dict.items():
                 setattr(dish, key, value)
 
             await self.session.commit()
@@ -82,7 +86,7 @@ class AsyncDishRepository:
             return dish
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="dish not found")
+                                detail='dish not found')
 
     async def delete_dish(self, dish_id: str):
         """Удаление блюда по id"""
@@ -93,7 +97,7 @@ class AsyncDishRepository:
             return dish
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="dish not found")
+                                detail='dish not found')
 
     async def get_menu_id_by_submenu_id(self,
                                         submenu_id):

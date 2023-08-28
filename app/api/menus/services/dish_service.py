@@ -1,4 +1,4 @@
-from fastapi import Depends, BackgroundTasks
+from fastapi import BackgroundTasks, Depends
 
 from app.db.cache import CacheRepository
 from app.db.repositories.dish_repository import AsyncDishRepository

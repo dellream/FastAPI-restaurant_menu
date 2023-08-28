@@ -1,18 +1,16 @@
-from fastapi import APIRouter, Depends, BackgroundTasks
-
-from typing import List
+from fastapi import APIRouter, BackgroundTasks, Depends
 from starlette import status
 
-from app.models.schemas.menus.dish_schemas import DishResponse, DishSchema
 from app.api.menus.services.dish_service import AsyncDishService
+from app.models.schemas.menus.dish_schemas import DishResponse, DishSchema
 
 dish_router = APIRouter(
-    prefix="/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes",
-    tags=["Dishes"]
+    prefix='/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes',
+    tags=['Dishes']
 )
 
 
-@dish_router.post("/",
+@dish_router.post('/',
                   response_model=DishResponse,
                   status_code=status.HTTP_201_CREATED)
 async def create_dish(background_tasks: BackgroundTasks,
@@ -26,8 +24,8 @@ async def create_dish(background_tasks: BackgroundTasks,
     )
 
 
-@dish_router.get("/",
-                 response_model=List[DishResponse])
+@dish_router.get('/',
+                 response_model=list[DishResponse])
 async def read_all_dishes(background_tasks: BackgroundTasks,
                           menu_id: str,
                           submenu_id: str,
@@ -48,7 +46,7 @@ async def read_all_dishes(background_tasks: BackgroundTasks,
     )
 
 
-@dish_router.get("/{dish_id}/",
+@dish_router.get('/{dish_id}/',
                  response_model=DishResponse)
 async def read_dish(background_tasks: BackgroundTasks,
                     menu_id: str,
@@ -63,7 +61,7 @@ async def read_dish(background_tasks: BackgroundTasks,
     )
 
 
-@dish_router.patch("/{dish_id}/",
+@dish_router.patch('/{dish_id}/',
                    response_model=DishResponse)
 async def update_dish(background_tasks: BackgroundTasks,
                       menu_id: str,
@@ -80,7 +78,7 @@ async def update_dish(background_tasks: BackgroundTasks,
     )
 
 
-@dish_router.delete("/{dish_id}/",
+@dish_router.delete('/{dish_id}/',
                     response_model=DishResponse)
 async def delete_dish(background_tasks: BackgroundTasks,
                       menu_id: str,

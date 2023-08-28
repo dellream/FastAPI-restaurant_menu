@@ -3,8 +3,8 @@
 
 """
 
-import warnings
 import functools
+import warnings
 
 
 def log_warnings(logger):
@@ -14,7 +14,7 @@ def log_warnings(logger):
             with WarningCollector() as collector:
                 result = func(*args, **kwargs)
             for warning in collector.warnings:
-                logger.warning(f"Captured warning: {warning}")
+                logger.warning(f'Captured warning: {warning}')
             return result
 
         return wrapper

@@ -1,12 +1,12 @@
 """version 3.1
 
 Revision ID: 4df16c0d873f
-Revises: 
+Revises:
 Create Date: 2023-08-07 10:56:44.067990
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '4df16c0d873f'

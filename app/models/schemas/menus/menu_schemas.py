@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class MenuBase(BaseModel):
     title: str
-    description: str = None
+    description: str | None
 
 
 class MenuSchema(MenuBase):
@@ -11,7 +11,7 @@ class MenuSchema(MenuBase):
 
 
 class MenuResponse(MenuSchema):
-    id: str
+    id: str | None
 
 
 class MenuCountResponse(MenuResponse):

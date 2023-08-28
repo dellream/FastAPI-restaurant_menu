@@ -1,21 +1,20 @@
-from fastapi import APIRouter, Depends, BackgroundTasks
-from typing import List
+from fastapi import APIRouter, BackgroundTasks, Depends
 from starlette import status
 
+from app.api.menus.services.submenu_service import AsyncSubmenuService
 from app.models.schemas.menus.submenu_schemas import (
+    SubmenuCountResponse,
     SubmenuResponse,
     SubmenuSchema,
-    SubmenuCountResponse
 )
-from app.api.menus.services.submenu_service import AsyncSubmenuService
 
 submenu_router = APIRouter(
-    prefix="/api/v1/menus/{menu_id}/submenus",
-    tags=["Submenus"]
+    prefix='/api/v1/menus/{menu_id}/submenus',
+    tags=['Submenus']
 )
 
 
-@submenu_router.post("/",
+@submenu_router.post('/',
                      response_model=SubmenuResponse,
                      status_code=status.HTTP_201_CREATED)
 async def create_submenus(submenu: SubmenuSchema,
@@ -29,8 +28,8 @@ async def create_submenus(submenu: SubmenuSchema,
     )
 
 
-@submenu_router.get("/",
-                    response_model=List[SubmenuResponse])
+@submenu_router.get('/',
+                    response_model=list[SubmenuResponse])
 async def read_all_submenus(menu_id: str,
                             background_tasks: BackgroundTasks,
                             submenu_service: AsyncSubmenuService = Depends()):
@@ -40,7 +39,7 @@ async def read_all_submenus(menu_id: str,
     )
 
 
-@submenu_router.get("/{submenu_id}/",
+@submenu_router.get('/{submenu_id}/',
                     response_model=SubmenuCountResponse)
 async def read_submenu(menu_id: str,
                        submenu_id: str,
@@ -53,7 +52,7 @@ async def read_submenu(menu_id: str,
     )
 
 
-@submenu_router.patch("/{submenu_id}/",
+@submenu_router.patch('/{submenu_id}/',
                       response_model=SubmenuResponse)
 async def update_submenu(menu_id: str,
                          submenu_id: str,
@@ -68,7 +67,7 @@ async def update_submenu(menu_id: str,
     )
 
 
-@submenu_router.delete("/{submenu_id}/",
+@submenu_router.delete('/{submenu_id}/',
                        response_model=SubmenuResponse)
 async def delete_submenu(menu_id: str,
                          submenu_id: str,

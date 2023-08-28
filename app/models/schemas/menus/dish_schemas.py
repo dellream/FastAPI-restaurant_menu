@@ -1,11 +1,9 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
 class DishBase(BaseModel):
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     price: str
 
 

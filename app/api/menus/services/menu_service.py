@@ -1,5 +1,5 @@
 """Сервисный слой для модели Меню"""
-from fastapi import Depends, BackgroundTasks
+from fastapi import BackgroundTasks, Depends
 
 from app.db.cache import CacheRepository
 from app.db.repositories.menu_repository import AsyncMenuRepository

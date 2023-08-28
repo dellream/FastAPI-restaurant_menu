@@ -1,20 +1,18 @@
 from typing import AsyncGenerator
-from aioredis import ConnectionPool, Redis
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from aioredis import ConnectionPool, Redis
+from sqlalchemy import MetaData
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from app.config import (
-    DB_USER,
-    DB_PASSWORD,
-    DB_HOST,
-    DB_PORT,
-    DB_NAME,
-    REDIS_URL
-)
+from app.config import DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER, REDIS_URL
 
 # Формируем URL для подключения
-SQLALCHEMY_DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+
+metadata = MetaData()
+Base = declarative_base()
 
 # Создаем асинхронную сессию
 engine = create_async_engine(SQLALCHEMY_DATABASE_URL)
