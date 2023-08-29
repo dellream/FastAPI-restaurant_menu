@@ -13,11 +13,12 @@ from app.models.schemas.menus.submenu_schemas import SubmenuSchema
 class AsyncSubmenuRepository:
     """Репозиторий необходимых CRUD операций для модели Подменю"""
 
-    def __init__(self, session: AsyncSession = Depends(get_async_session)):
+    def __init__(self,
+                 session: AsyncSession = Depends(get_async_session)) -> None:
         self.session = session
 
     # Доработать репозиторий, подменю с одинаковыми названиями не должно быть
-    async def create_submenu(self, menu_id: str, submenu):
+    async def create_submenu(self, menu_id: str, submenu: SubmenuSchema) -> Submenu:
         """Добавление нового подменю"""
         try:
             submenu_obj = Submenu(title=submenu.title,
@@ -32,7 +33,7 @@ class AsyncSubmenuRepository:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail='submenu with this title already exists')
 
-    async def read_all_submenus(self, menu_id) -> list[Submenu]:
+    async def read_all_submenus(self, menu_id: str) -> list[Submenu]:
         """Получение всех подменю"""
         query = await self.session.execute(
             select(
@@ -74,7 +75,7 @@ class AsyncSubmenuRepository:
 
     async def update_submenu(self,
                              submenu_id: str,
-                             updated_submenu: SubmenuSchema):
+                             updated_submenu: SubmenuSchema) -> Submenu:
         """Изменение подменю по id"""
         current_submenu = await self.session.get(Submenu, submenu_id)
 
@@ -90,7 +91,7 @@ class AsyncSubmenuRepository:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail='submenu not found')
 
-    async def delete_submenu(self, submenu_id: str):
+    async def delete_submenu(self, submenu_id: str) -> Submenu:
         """Удаление подменю по id"""
         submenu = await self.session.get(Submenu, submenu_id)
         if submenu:

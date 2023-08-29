@@ -13,11 +13,14 @@ from app.models.schemas.menus.dish_schemas import DishSchema
 class AsyncDishRepository:
     """Репозиторий необходимых CRUD операций для модели Блюда"""
 
-    def __init__(self, session: AsyncSession = Depends(get_async_session)):
+    def __init__(self,
+                 session: AsyncSession = Depends(get_async_session)) -> None:
         self.session = session
 
     # Доработать репозиторий, не должно быть блюд с одинаковыми названиями
-    async def create_dish(self, submenu_id: str, dish):
+    async def create_dish(self,
+                          submenu_id: str,
+                          dish: DishSchema) -> Dish:
         """Добавление нового блюда"""
         try:
             dish_obj = Dish(title=dish.title,
@@ -33,7 +36,8 @@ class AsyncDishRepository:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail='dish with this title already exists')
 
-    async def read_all_dishes(self, submenu_id) -> list[Dish]:
+    async def read_all_dishes(self,
+                              submenu_id: str) -> list[Dish]:
         """Получение всех блюд"""
         query = await self.session.execute(
             select(
@@ -48,7 +52,8 @@ class AsyncDishRepository:
         )
         return query.all()
 
-    async def read_dish(self, dish_id: str) -> Dish:
+    async def read_dish(self,
+                        dish_id: str) -> Dish:
         """Получение блюда по id"""
         query = await self.session.execute(
             select(
@@ -68,7 +73,9 @@ class AsyncDishRepository:
             raise HTTPException(status.HTTP_404_NOT_FOUND,
                                 detail='dish not found')
 
-    async def update_dish(self, dish_id: str, updated_dish: DishSchema) -> Dish:
+    async def update_dish(self,
+                          dish_id: str,
+                          updated_dish: DishSchema) -> Dish:
         """Изменение блюда по id"""
         # Находим текущее блюдо в бд
         current_dish = await self.session.get(Dish, dish_id)
@@ -86,7 +93,8 @@ class AsyncDishRepository:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail='dish not found')
 
-    async def delete_dish(self, dish_id: str):
+    async def delete_dish(self,
+                          dish_id: str) -> Dish:
         """Удаление блюда по id"""
         dish = await self.session.get(Dish, dish_id)
         if dish:
@@ -98,7 +106,7 @@ class AsyncDishRepository:
                                 detail='dish not found')
 
     async def get_menu_id_by_submenu_id(self,
-                                        submenu_id):
+                                        submenu_id: str) -> str | None:
         """
         Получение menu_id по идентификатору подменю
 

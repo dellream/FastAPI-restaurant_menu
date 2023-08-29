@@ -13,12 +13,12 @@ from app.models.schemas.menus.menu_schemas import MenuSchema
 class AsyncMenuRepository:
     """Репозиторий необходимых CRUD операций для модели Меню"""
 
-    def __init__(self, session: AsyncSession = Depends(get_async_session)):
+    def __init__(self, session: AsyncSession = Depends(get_async_session)) -> None:
         self.session = session
 
     # Необходимо доработать репозиторий на проверку существующего меню,
     # не должно быть два меню с одинаковым названием
-    async def create_menu(self, menu):
+    async def create_menu(self, menu: MenuSchema) -> Menu:
         """Добавление нового меню"""
         try:
             menu_obj = Menu(title=menu.title, description=menu.description)
@@ -70,7 +70,7 @@ class AsyncMenuRepository:
             raise HTTPException(status.HTTP_404_NOT_FOUND,
                                 detail='menu not found')
 
-    async def update_menu(self, menu_id: str, updated_menu: MenuSchema):
+    async def update_menu(self, menu_id: str, updated_menu: MenuSchema) -> Menu:
         """Изменение меню по id"""
         current_menu = await self.session.get(Menu, menu_id)
 
@@ -86,7 +86,7 @@ class AsyncMenuRepository:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail='menu not found')
 
-    async def delete_menu(self, menu_id: str):
+    async def delete_menu(self, menu_id: str) -> Menu:
         """Удаление меню по id"""
         menu = await self.session.get(Menu, menu_id)
         if menu:
