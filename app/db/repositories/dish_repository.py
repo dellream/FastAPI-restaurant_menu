@@ -1,24 +1,26 @@
-import time
 import uuid
-from typing import List
 
+from fastapi import Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from fastapi import HTTPException, status, Depends
 
 from app.db.database_connect import get_async_session
 from app.models.domain.menus_models import Dish, Submenu
+from app.models.schemas.menus.dish_schemas import DishSchema
 
 
 class AsyncDishRepository:
     """Репозиторий необходимых CRUD операций для модели Блюда"""
 
-    def __init__(self, session: AsyncSession = Depends(get_async_session)):
+    def __init__(self,
+                 session: AsyncSession = Depends(get_async_session)) -> None:
         self.session = session
 
     # Доработать репозиторий, не должно быть блюд с одинаковыми названиями
-    async def create_dish(self, submenu_id: str, dish):
+    async def create_dish(self,
+                          submenu_id: str,
+                          dish: DishSchema) -> Dish:
         """Добавление нового блюда"""
         try:
             dish_obj = Dish(title=dish.title,
@@ -32,9 +34,10 @@ class AsyncDishRepository:
             return dish_obj
         except IntegrityError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="dish with this title already exists")
+                                detail='dish with this title already exists')
 
-    async def read_all_dishes(self, submenu_id) -> List[Dish]:
+    async def read_all_dishes(self,
+                              submenu_id: str) -> list[Dish]:
         """Получение всех блюд"""
         query = await self.session.execute(
             select(
@@ -49,7 +52,8 @@ class AsyncDishRepository:
         )
         return query.all()
 
-    async def read_dish(self, dish_id: str) -> Dish:
+    async def read_dish(self,
+                        dish_id: str) -> Dish:
         """Получение блюда по id"""
         query = await self.session.execute(
             select(
@@ -69,22 +73,28 @@ class AsyncDishRepository:
             raise HTTPException(status.HTTP_404_NOT_FOUND,
                                 detail='dish not found')
 
-    async def update_dish(self, dish_id: str, updated_dish: dict):
+    async def update_dish(self,
+                          dish_id: str,
+                          updated_dish: DishSchema) -> Dish:
         """Изменение блюда по id"""
-        dish = await self.session.get(Dish, dish_id)
+        # Находим текущее блюдо в бд
+        current_dish = await self.session.get(Dish, dish_id)
 
-        if dish:
-            for key, value in updated_dish.dict(exclude_unset=True).items():
-                setattr(dish, key, value)
+        if current_dish:
+            current_dish.title = updated_dish.title
+            current_dish.description = updated_dish.description
+            current_dish.price = updated_dish.price
 
+            await self.session.merge(current_dish)
             await self.session.commit()
-            await self.session.refresh(dish)
-            return dish
+            await self.session.refresh(current_dish)
+            return current_dish
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="dish not found")
+                                detail='dish not found')
 
-    async def delete_dish(self, dish_id: str):
+    async def delete_dish(self,
+                          dish_id: str) -> Dish:
         """Удаление блюда по id"""
         dish = await self.session.get(Dish, dish_id)
         if dish:
@@ -93,10 +103,10 @@ class AsyncDishRepository:
             return dish
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="dish not found")
+                                detail='dish not found')
 
     async def get_menu_id_by_submenu_id(self,
-                                        submenu_id):
+                                        submenu_id: str) -> str | None:
         """
         Получение menu_id по идентификатору подменю
 

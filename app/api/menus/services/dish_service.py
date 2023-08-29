@@ -1,7 +1,8 @@
-from fastapi import Depends, BackgroundTasks
+from fastapi import BackgroundTasks, Depends
 
 from app.db.cache import CacheRepository
 from app.db.repositories.dish_repository import AsyncDishRepository
+from app.models.domain.menus_models import Dish
 from app.models.schemas.menus.dish_schemas import DishSchema
 
 
@@ -10,14 +11,14 @@ class AsyncDishService:
 
     def __init__(self,
                  dish_repo: AsyncDishRepository = Depends(),
-                 cache_repo: CacheRepository = Depends()):
+                 cache_repo: CacheRepository = Depends()) -> None:
         self.dish_repo = dish_repo
         self.cache_repo = cache_repo
 
     async def create_dish(self,
                           submenu_id: str,
                           dish: DishSchema,
-                          background_tasks: BackgroundTasks):
+                          background_tasks: BackgroundTasks) -> Dish:
         """
         Исправить
 
@@ -26,11 +27,6 @@ class AsyncDishService:
         Создает в базе данных запись о новом блюде, создает фоновую задачу
         (чтобы пользователь не ждали кеширования запросов) на кеширование
         данного блюда и инвалидацию списка всех блюд
-
-        :param submenu_id: Идентификатор подменю
-        :param dish: Информация о блюде
-        :param background_tasks: Фоновая задача
-        :return: Информация о созданном блюде
         """
         dish_info = await self.dish_repo.create_dish(submenu_id, dish)
         menu_id = await self.dish_repo.get_menu_id_by_submenu_id(submenu_id)
@@ -43,9 +39,9 @@ class AsyncDishService:
         return dish_info
 
     async def read_all_dishes(self,
-                              menu_id,
-                              submenu_id,
-                              background_tasks: BackgroundTasks):
+                              menu_id: str,
+                              submenu_id: str,
+                              background_tasks: BackgroundTasks) -> list[Dish]:
         """
         Получение всех блюд
 
@@ -53,11 +49,6 @@ class AsyncDishService:
 
         Если кеша нет, то совершает запрос в БД. Создает фоновую задачу
         на создание кеша для данного запроса
-
-        :param menu_id: Идентификатор меню
-        :param submenu_id: Идентификатор подменю
-        :param background_tasks: Фоновая задача
-        :return: Информацию обо всех блюдах
         """
         cache = await self.cache_repo.get_all_dishes_cache(
             menu_id=menu_id,
@@ -80,7 +71,7 @@ class AsyncDishService:
                         menu_id: str,
                         submenu_id: str,
                         dish_id: str,
-                        background_tasks: BackgroundTasks):
+                        background_tasks: BackgroundTasks) -> Dish:
         """Получение блюд по id"""
         cache = await self.cache_repo.get_dish_cache(
             menu_id=menu_id,
@@ -103,7 +94,7 @@ class AsyncDishService:
                           submenu_id: str,
                           dish_id: str,
                           updated_dish: DishSchema,
-                          background_tasks: BackgroundTasks):
+                          background_tasks: BackgroundTasks) -> Dish:
         """Изменение блюд по id"""
         dish = await self.dish_repo.update_dish(dish_id, updated_dish)
         background_tasks.add_task(
@@ -118,7 +109,7 @@ class AsyncDishService:
                           menu_id: str,
                           submenu_id: str,
                           dish_id: str,
-                          background_tasks: BackgroundTasks):
+                          background_tasks: BackgroundTasks) -> Dish:
         """Удаление блюд по id"""
         dish = await self.dish_repo.delete_dish(dish_id=dish_id)
         background_tasks.add_task(

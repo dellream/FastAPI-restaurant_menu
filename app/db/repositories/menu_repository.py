@@ -1,24 +1,24 @@
 import uuid
-from typing import List
 
+from fastapi import Depends, HTTPException, status
+from sqlalchemy import distinct, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, distinct
-from fastapi import HTTPException, status, Depends
 
 from app.db.database_connect import get_async_session
-from app.models.domain.menus_models import Menu, Submenu, Dish
+from app.models.domain.menus_models import Dish, Menu, Submenu
+from app.models.schemas.menus.menu_schemas import MenuSchema
 
 
 class AsyncMenuRepository:
     """Репозиторий необходимых CRUD операций для модели Меню"""
 
-    def __init__(self, session: AsyncSession = Depends(get_async_session)):
+    def __init__(self, session: AsyncSession = Depends(get_async_session)) -> None:
         self.session = session
 
     # Необходимо доработать репозиторий на проверку существующего меню,
     # не должно быть два меню с одинаковым названием
-    async def create_menu(self, menu):
+    async def create_menu(self, menu: MenuSchema) -> Menu:
         """Добавление нового меню"""
         try:
             menu_obj = Menu(title=menu.title, description=menu.description)
@@ -29,9 +29,9 @@ class AsyncMenuRepository:
             return menu_obj
         except IntegrityError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Menu with this title is already exists")
+                                detail='Menu with this title is already exists')
 
-    async def read_all_menus(self) -> List[Menu]:
+    async def read_all_menus(self) -> list[Menu]:
         """Получение всех меню"""
         query = await self.session.execute(
             select(
@@ -70,23 +70,23 @@ class AsyncMenuRepository:
             raise HTTPException(status.HTTP_404_NOT_FOUND,
                                 detail='menu not found')
 
-    async def update_menu(self, menu_id: str, updated_menu: dict):
+    async def update_menu(self, menu_id: str, updated_menu: MenuSchema) -> Menu:
         """Изменение меню по id"""
-        menu = await self.session.get(Menu, menu_id)
+        current_menu = await self.session.get(Menu, menu_id)
 
-        if menu:
-            # Изменим текущее меню на основе принятого измененного updated_menu
-            for key, value in updated_menu.dict(exclude_unset=True).items():
-                setattr(menu, key, value)  # Меняем значение аттрибута menu по его имени key на значение value
+        if current_menu:
+            current_menu.title = updated_menu.title
+            current_menu.description = updated_menu.description
 
+            await self.session.merge(current_menu)
             await self.session.commit()
-            await self.session.refresh(menu)
-            return menu
+            await self.session.refresh(current_menu)
+            return current_menu
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="menu not found")
+                                detail='menu not found')
 
-    async def delete_menu(self, menu_id: str):
+    async def delete_menu(self, menu_id: str) -> Menu:
         """Удаление меню по id"""
         menu = await self.session.get(Menu, menu_id)
         if menu:
@@ -95,4 +95,4 @@ class AsyncMenuRepository:
             return menu
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="menu not found")
+                                detail='menu not found')

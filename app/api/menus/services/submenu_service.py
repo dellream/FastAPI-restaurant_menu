@@ -1,7 +1,8 @@
-from fastapi import Depends, BackgroundTasks
+from fastapi import BackgroundTasks, Depends
 
 from app.db.cache import CacheRepository
 from app.db.repositories.submenu_repository import AsyncSubmenuRepository
+from app.models.domain.menus_models import Submenu
 from app.models.schemas.menus.submenu_schemas import SubmenuSchema
 
 
@@ -10,14 +11,14 @@ class AsyncSubmenuService:
 
     def __init__(self,
                  submenu_repo: AsyncSubmenuRepository = Depends(),
-                 cache_repo: CacheRepository = Depends()):
+                 cache_repo: CacheRepository = Depends()) -> None:
         self.submenu_repo = submenu_repo
         self.cache_repo = cache_repo
 
     async def create_submenu(self,
                              menu_id: str,
                              submenu: SubmenuSchema,
-                             background_tasks: BackgroundTasks):
+                             background_tasks: BackgroundTasks) -> Submenu:
         """Добавление нового подменю"""
         created_submenu = await self.submenu_repo.create_submenu(menu_id, submenu)
         submenu_info = await self.submenu_repo.read_submenu(
@@ -33,7 +34,7 @@ class AsyncSubmenuService:
 
     async def read_all_submenus(self,
                                 menu_id: str,
-                                background_tasks: BackgroundTasks):
+                                background_tasks: BackgroundTasks) -> list[Submenu]:
         """Получение всех подменю"""
         cache = await self.cache_repo.get_all_submenus_cache(menu_id=menu_id)
         if cache:
@@ -49,7 +50,7 @@ class AsyncSubmenuService:
     async def read_submenu(self,
                            menu_id: str,
                            submenu_id: str,
-                           background_tasks: BackgroundTasks):
+                           background_tasks: BackgroundTasks) -> Submenu:
         """Получение подменю по id"""
         cache = await self.cache_repo.get_submenu_cache(menu_id, submenu_id)
         if cache:
@@ -67,7 +68,7 @@ class AsyncSubmenuService:
                              menu_id: str,
                              submenu_id: str,
                              updated_submenu: SubmenuSchema,
-                             background_tasks: BackgroundTasks):
+                             background_tasks: BackgroundTasks) -> Submenu:
         """Изменение подменю по id"""
         updated_submenu_info = await self.submenu_repo.update_submenu(
             submenu_id=submenu_id,
@@ -87,7 +88,7 @@ class AsyncSubmenuService:
     async def delete_submenu(self,
                              menu_id: str,
                              submenu_id: str,
-                             background_tasks: BackgroundTasks):
+                             background_tasks: BackgroundTasks) -> Submenu:
         """Удаление подменю по id"""
         submenu = await self.submenu_repo.delete_submenu(submenu_id=submenu_id)
         background_tasks.add_task(

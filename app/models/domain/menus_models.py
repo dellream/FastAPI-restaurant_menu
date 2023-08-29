@@ -1,10 +1,9 @@
 import uuid
-from sqlalchemy import Column, String, ForeignKey, MetaData
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
 
-metadata = MetaData()
-Base = declarative_base(metadata=metadata)
+from sqlalchemy import Column, ForeignKey, String
+from sqlalchemy.orm import relationship
+
+from app.db.database_connect import Base
 
 
 class Menu(Base):
@@ -15,7 +14,7 @@ class Menu(Base):
     title = Column(String, index=True, nullable=False)
     description = Column(String)
 
-    submenus = relationship("Submenu", back_populates="menu", cascade="all, delete-orphan, delete")
+    submenus = relationship('Submenu', back_populates='menu', cascade='all, delete-orphan, delete')
 
 
 class Submenu(Base):
@@ -28,9 +27,9 @@ class Submenu(Base):
 
     # menu_id = Column(UUID(as_uuid=True), ForeignKey('menus.id'), nullable=False)
     menu_id = Column(String, ForeignKey('menus.id'), nullable=False)
-    menu = relationship("Menu", back_populates="submenus")
+    menu = relationship('Menu', back_populates='submenus')
 
-    dishes = relationship("Dish", back_populates="submenu", cascade="all, delete-orphan")
+    dishes = relationship('Dish', back_populates='submenu', cascade='all, delete-orphan')
 
 
 class Dish(Base):
@@ -45,4 +44,4 @@ class Dish(Base):
 
     # submenu_id = Column(UUID(as_uuid=True), ForeignKey('submenus.id'), nullable=False)
     submenu_id = Column(String, ForeignKey('submenus.id'), nullable=False)
-    submenu = relationship("Submenu", back_populates="dishes")
+    submenu = relationship('Submenu', back_populates='dishes')

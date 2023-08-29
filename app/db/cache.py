@@ -326,7 +326,7 @@ class CacheRepository:
         :return: None
         """
         await self.delete_cache_by_mask(
-            link=f'/menus/{submenu_info.menu_id}/submenus/{submenu_info.id}'
+            link=f'/menus/{menu_id}/submenus/{submenu_id}'
         )
         await self.set_submenu_cache(
             submenu_info=submenu_info,
@@ -356,7 +356,7 @@ class CacheRepository:
 
         :return: Список подменю из кеша, либо None, если кеш не существует.
         """
-        cache = await self.redis_cacher.get(f'/menus/')
+        cache = await self.redis_cacher.get('/menus/')
         if cache:
             return pickle.loads(cache)
         return None
@@ -377,7 +377,7 @@ class CacheRepository:
         :return: None.
         """
         await self.redis_cacher.set(
-            f'/menus/',
+            '/menus/',
             pickle.dumps(menu_list),
             ex=EXPIRATION
         )
@@ -429,7 +429,7 @@ class CacheRepository:
         :return: None
         """
         await self.delete_list_cache(
-            link=f'/menus/'
+            link='/menus/'
         )
         await self.set_menu_cache(
             menu_info=menu_info,

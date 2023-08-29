@@ -1,22 +1,24 @@
 import uuid
-from typing import List
 
+from fastapi import Depends, HTTPException, status
+from sqlalchemy import distinct, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, distinct
-from fastapi import HTTPException, status, Depends
 
 from app.db.database_connect import get_async_session
-from app.models.domain.menus_models import Submenu, Dish
+from app.models.domain.menus_models import Dish, Submenu
+from app.models.schemas.menus.submenu_schemas import SubmenuSchema
 
 
 class AsyncSubmenuRepository:
     """Репозиторий необходимых CRUD операций для модели Подменю"""
-    def __init__(self, session: AsyncSession = Depends(get_async_session)):
+
+    def __init__(self,
+                 session: AsyncSession = Depends(get_async_session)) -> None:
         self.session = session
 
     # Доработать репозиторий, подменю с одинаковыми названиями не должно быть
-    async def create_submenu(self, menu_id: str, submenu):
+    async def create_submenu(self, menu_id: str, submenu: SubmenuSchema) -> Submenu:
         """Добавление нового подменю"""
         try:
             submenu_obj = Submenu(title=submenu.title,
@@ -29,9 +31,9 @@ class AsyncSubmenuRepository:
             return submenu_obj
         except IntegrityError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="submenu with this title already exists")
+                                detail='submenu with this title already exists')
 
-    async def read_all_submenus(self, menu_id) -> List[Submenu]:
+    async def read_all_submenus(self, menu_id: str) -> list[Submenu]:
         """Получение всех подменю"""
         query = await self.session.execute(
             select(
@@ -71,23 +73,25 @@ class AsyncSubmenuRepository:
             raise HTTPException(status.HTTP_404_NOT_FOUND,
                                 detail='submenu not found')
 
-    async def update_submenu(self, submenu_id: str, updated_submenu: dict):
+    async def update_submenu(self,
+                             submenu_id: str,
+                             updated_submenu: SubmenuSchema) -> Submenu:
         """Изменение подменю по id"""
-        submenu = await self.session.get(Submenu, submenu_id)
+        current_submenu = await self.session.get(Submenu, submenu_id)
 
-        if submenu:
-            # Изменим текущее меню на основе принятого измененного updated_submenu
-            for key, value in updated_submenu.dict(exclude_unset=True).items():
-                setattr(submenu, key, value)  # Меняем значение аттрибута menu по его имени key на значение value
+        if current_submenu:
+            current_submenu.title = updated_submenu.title
+            current_submenu.description = updated_submenu.description
 
+            await self.session.merge(current_submenu)
             await self.session.commit()
-            await self.session.refresh(submenu)
-            return submenu
+            await self.session.refresh(current_submenu)
+            return current_submenu
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="submenu not found")
+                                detail='submenu not found')
 
-    async def delete_submenu(self, submenu_id: str):
+    async def delete_submenu(self, submenu_id: str) -> Submenu:
         """Удаление подменю по id"""
         submenu = await self.session.get(Submenu, submenu_id)
         if submenu:
@@ -96,4 +100,4 @@ class AsyncSubmenuRepository:
             return submenu
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="submenu not found")
+                                detail='submenu not found')
