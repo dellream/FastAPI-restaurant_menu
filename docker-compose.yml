@@ -1,26 +1,69 @@
 version: '3.8'
 services:
-  api:
+  backend:
     build:
       context: .
-      dockerfile: app/Dockerfile
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    networks:
+      - main_network
     ports:
       - "8000:8000"
     entrypoint: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
 
   db:
     image: postgres:15.1-alpine
-    environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+    restart: always
+    container_name: db
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - main_network
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DBNAME: ${DB_NAME}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U myuser -d mydatabase" ]
+      test: [ "CMD-SHELL", "pg_isready", "-U", "$${POSTGRES_USER}", "-d", "$${POSTGRES_DBNAME}" ]
       interval: 5s
       timeout: 30s
       retries: 3
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    networks:
+      - main_network
+    volumes:
+      - redis_data:/data
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
+networks:
+  main_network:
+    name: main_network
+volumes:
+  postgres_data:
+    name: postgres_data
+  redis_data:
+    name: redis_data

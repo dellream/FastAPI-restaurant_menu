@@ -3,7 +3,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: app/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     entrypoint: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
@@ -28,7 +28,7 @@ services:
   tests:
     build:
       context: .
-      dockerfile: app/Dockerfile
+      dockerfile: Dockerfile
     depends_on:
       - db
       - api
