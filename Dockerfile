@@ -5,7 +5,7 @@ FROM python:3.10-slim
 ENV PYTHONUNBUFFERED 1
 
 # Установим рабочую директорию
-WORKDIR /project
+WORKDIR /project/
 
 # Установим зависимости
 COPY requirements.txt /project/
@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Скопируем файлы FastAPI приложения в контейнер
 COPY app /project/app
 COPY migrations /project/migrations
+COPY tests /project/tests
 
 COPY alembic.ini /project/
 

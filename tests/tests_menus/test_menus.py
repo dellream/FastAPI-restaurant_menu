@@ -2,7 +2,7 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from app.config import BASE_URL
+from app.config import DOCKER_URL
 from app.main import app
 
 client = TestClient(app)
@@ -12,7 +12,7 @@ client = TestClient(app)
 async def http_client():
     async with httpx.AsyncClient(
             app=app,
-            base_url=BASE_URL
+            base_url=DOCKER_URL
     ) as aclient:
         yield aclient
 
@@ -67,7 +67,7 @@ class TestMenu:
     @pytest.mark.order(1)
     @pytest.mark.asyncio
     async def test_create_menu(self, http_client):
-        url = f'{BASE_URL}/menus/'
+        url = f'{DOCKER_URL}/menus/'
 
         data = {
             'title': 'Menu 1',
@@ -87,7 +87,7 @@ class TestMenu:
     @pytest.mark.order(2)
     @pytest.mark.asyncio
     async def test_create_submenu(self, http_client, menu_id):
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/'
         data = {
             'title': 'Submenu 1',
             'description': 'Description of Submenu 1'
@@ -119,7 +119,7 @@ class TestMenu:
             }
         ]
 
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/'
 
         async for every_client in http_client:
             for data in dishes_data:
@@ -134,7 +134,7 @@ class TestMenu:
     @pytest.mark.order(4)
     @pytest.mark.asyncio
     async def test_read_all_menus(self, http_client):
-        url = f'{BASE_URL}/menus/'
+        url = f'{DOCKER_URL}/menus/'
         async for every_client in http_client:
             response = await every_client.get(url)
             assert response.status_code == 200
@@ -144,7 +144,7 @@ class TestMenu:
     @pytest.mark.order(5)
     @pytest.mark.asyncio
     async def test_read_menu(self, http_client):
-        url = f'{BASE_URL}/menus/{menu_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/'
         async for every_client in http_client:
             response = await every_client.get(url)
             assert response.status_code == 200
@@ -158,7 +158,7 @@ class TestMenu:
     @pytest.mark.order(6)
     @pytest.mark.asyncio
     async def test_read_all_submenus(self, http_client, menu_id):
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/'
         async for every_client in http_client:
             response = await every_client.get(url)
             assert response.status_code == 200
@@ -168,7 +168,7 @@ class TestMenu:
     @pytest.mark.order(7)
     @pytest.mark.asyncio
     async def test_read_submenu(self, http_client, menu_id, submenu_id):
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/'
         async for every_client in http_client:
             response = await every_client.get(url)
             assert response.status_code == 200
@@ -181,7 +181,7 @@ class TestMenu:
     @pytest.mark.order(8)
     @pytest.mark.asyncio
     async def test_read_all_dishes(self, http_client, menu_id, submenu_id):
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/'
         async for every_client in http_client:
             response = await every_client.get(url)
             assert response.status_code == 200
@@ -191,7 +191,7 @@ class TestMenu:
     @pytest.mark.order(9)
     @pytest.mark.asyncio
     async def test_read_dish(self, http_client, menu_id, submenu_id, dish_id):
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
         async for every_client in http_client:
             response = await every_client.get(url)
             assert response.status_code == 200
@@ -204,7 +204,7 @@ class TestMenu:
     @pytest.mark.order(10)
     @pytest.mark.asyncio
     async def test_update_menu(self, http_client, menu_id):
-        url = f'{BASE_URL}/menus/{menu_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/'
         data = {
             'title': 'Updated Menu',
             'description': 'Updated description'
@@ -222,7 +222,7 @@ class TestMenu:
         assert menu_id is not None, 'ID меню не был сохранен'
         assert submenu_id is not None, 'ID подменю не был сохранен'
 
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/'
         data = {
             'title': 'Updated Submenu',
             'description': 'Updated description'
@@ -238,7 +238,7 @@ class TestMenu:
     @pytest.mark.order(12)
     @pytest.mark.asyncio
     async def test_update_dish(self, http_client, menu_id, submenu_id):
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
         data = {
             'title': 'Updated Dish',
             'description': 'Updated description',
@@ -255,7 +255,7 @@ class TestMenu:
     @pytest.mark.order(13)
     @pytest.mark.asyncio
     async def test_delete_dish(self, http_client, menu_id, submenu_id, dish_id):
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
         async for every_client in http_client:
             response = await every_client.delete(url)
             assert response.status_code == 200
@@ -264,7 +264,7 @@ class TestMenu:
     @pytest.mark.order(14)
     @pytest.mark.asyncio
     async def test_delete_submenu(self, http_client, menu_id, submenu_id):
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/'
         async for every_client in http_client:
             response = every_client.delete(url)
             assert response.status_code == 200
@@ -273,7 +273,7 @@ class TestMenu:
     @pytest.mark.order(15)
     @pytest.mark.asyncio
     async def test_read_all_submenus_after_delete(self, http_client, menu_id, submenu_id):
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/'
         async for every_client in http_client:
             response = every_client.get(url)
             assert (response.json() == []), 'Ожидался пустой список, сейчас список не пуст'
@@ -282,7 +282,7 @@ class TestMenu:
     @pytest.mark.order(16)
     @pytest.mark.asyncio
     async def test_delete_menu(self, http_client, menu_id):
-        url = f'{BASE_URL}/menus/{menu_id}/'
+        url = f'{DOCKER_URL}/menus/{menu_id}/'
         async for every_client in http_client:
             response = every_client.delete(url)
             assert response.status_code == 200
