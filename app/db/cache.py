@@ -4,6 +4,7 @@ from fastapi import Depends
 
 from app.config import EXPIRATION
 from app.db.database_connect import get_redis
+from app.models.domain.menus_models import Dish, Menu, Submenu
 
 
 class CacheRepository:
@@ -12,11 +13,11 @@ class CacheRepository:
     """
 
     def __init__(self,
-                 redis_cacher=Depends(get_redis)):
+                 redis_cacher=Depends(get_redis)) -> None:
         self.redis_cacher = redis_cacher
 
     async def delete_cache_by_mask(self,
-                                   link):
+                                   link: str) -> None:
         """
         Удаление записей из кеша по маске.
 
@@ -30,7 +31,7 @@ class CacheRepository:
             await self.redis_cacher.delete(key)
 
     async def delete_list_cache(self,
-                                link):
+                                link: str) -> None:
         """
         Удаление записей из кеша по указанной ссылке.
 
@@ -39,12 +40,8 @@ class CacheRepository:
         """
         await self.redis_cacher.delete(link)
 
-    async def delete_cache_except_dish_keys(self):
-        """
-        Удаление всех записей из кеша, кроме ключей для конкретных блюд.
-
-        :return: None
-        """
+    async def delete_cache_except_dish_keys(self) -> None:
+        """Удаление всех записей из кеша, кроме ключей для конкретных блюд."""
         all_keys = await self.redis_cacher.keys('*')
 
         dish_keys_to_keep = set()
@@ -59,9 +56,9 @@ class CacheRepository:
             await self.redis_cacher.delete(key)
 
     async def set_all_dishes_cache(self,
-                                   submenu_id,
-                                   dish_list,
-                                   menu_id):
+                                   submenu_id: str,
+                                   dish_list: list[Dish],
+                                   menu_id) -> None:
         """
         Запись всех блюд в кеш.
 
@@ -84,8 +81,8 @@ class CacheRepository:
         )
 
     async def get_all_dishes_cache(self,
-                                   menu_id,
-                                   submenu_id):
+                                   menu_id: str,
+                                   submenu_id: str) -> list[Dish] | None:
         """
         Получение всех блюд из кеша.
 
@@ -105,9 +102,9 @@ class CacheRepository:
         return None
 
     async def set_dish_cache(self,
-                             menu_id,
-                             submenu_id,
-                             dish_info):
+                             menu_id: str,
+                             submenu_id: str,
+                             dish_info: Dish) -> None:
         """
         Запись информации о блюде в кеш.
 
@@ -123,9 +120,9 @@ class CacheRepository:
         )
 
     async def get_dish_cache(self,
-                             menu_id,
-                             submenu_id,
-                             dish_id):
+                             menu_id: str,
+                             submenu_id: str,
+                             dish_id: str) -> Dish | None:
         """
         Получение информации об одном блюде из кеша.
 
@@ -142,9 +139,9 @@ class CacheRepository:
         return None
 
     async def create_new_dish_cache(self,
-                                    dish_info,
-                                    submenu_id,
-                                    menu_id):
+                                    dish_info: Dish,
+                                    submenu_id: str,
+                                    menu_id: str) -> None:
         """
         Создание новой записи о блюде в кеше.
 
@@ -168,9 +165,9 @@ class CacheRepository:
         )
 
     async def update_dish_cache(self,
-                                dish_info,
-                                menu_id,
-                                submenu_id):
+                                dish_info: Dish,
+                                menu_id: str,
+                                submenu_id: str) -> None:
         """
         Обновление кеша конкретного блюда при изменении этого блюда в БД.
 
@@ -197,7 +194,7 @@ class CacheRepository:
     async def delete_dish_cache(self,
                                 menu_id: str,
                                 submenu_id: str,
-                                dish_id: str):
+                                dish_id: str) -> None:
         """
         Удаление кеша в связи с удалением блюда из БД
 
@@ -211,7 +208,7 @@ class CacheRepository:
         )
 
     async def get_all_submenus_cache(self,
-                                     menu_id):
+                                     menu_id: str) -> list[Submenu] | None:
         """
         Получение всех подменю из кеша.
 
@@ -229,8 +226,8 @@ class CacheRepository:
         return None
 
     async def set_all_submenus_cache(self,
-                                     menu_id,
-                                     submenu_list):
+                                     menu_id: str,
+                                     submenu_list: list[Submenu]) -> None:
         """
         Запись всех подменю в кеш.
 
@@ -252,8 +249,8 @@ class CacheRepository:
         )
 
     async def get_submenu_cache(self,
-                                menu_id,
-                                submenu_id):
+                                menu_id: str,
+                                submenu_id: str) -> Submenu | None:
         """
         Получение информации об одном подменю из кеша
 
@@ -269,12 +266,14 @@ class CacheRepository:
         return None
 
     async def set_submenu_cache(self,
-                                menu_id,
-                                submenu_id,
-                                submenu_info):
+                                menu_id: str,
+                                submenu_id: str,
+                                submenu_info: Submenu) -> None:
         """
         Запись информации о подменю в кеш
 
+        :param submenu_id: ID подменю.
+        :param menu_id: ID меню.
         :param submenu_info: Информация о подменю.
         :return: None.
         """
@@ -285,20 +284,21 @@ class CacheRepository:
         )
 
     async def create_new_submenu_cache(self,
-                                       submenu_info,
-                                       menu_id,
-                                       submenu_id):
+                                       submenu_info: Submenu,
+                                       menu_id: str,
+                                       submenu_id: str) -> None:
         """
         Создание новой записи о подменю в кеше.
 
         Если в БД происходит внесение изменений (в т.ч добавление нового подменю),
         то должно происходить обновление кеша для всех подменю, не задевая кеш для
-        конкретных подменю
+        конкретных блюд
 
-        Происходит удаление кеша для списка всех подменю, и создается кеш для создаваемого
+        Происходит очистка кеша, который становится неактуальным, и создается кеш для создаваемого
         подменю.
 
-        :param menu_id: ID меню у данного подменю
+        :param submenu_id: ID подменю.
+        :param menu_id: ID меню у данного подменю.
         :param submenu_info: Информация о создаваемом подменю.
         :return: None
         """
@@ -312,7 +312,7 @@ class CacheRepository:
     async def update_submenu_cache(self,
                                    submenu_info,
                                    menu_id: str,
-                                   submenu_id: str):
+                                   submenu_id: str) -> None:
         """
         Обновление кеша конкретного подменю при изменении этого подменю в БД.
 
@@ -322,6 +322,8 @@ class CacheRepository:
         Происходит удаление кеша для данного подменю, повторное создание кеша для данного
         подменю.
 
+        :param submenu_id: ID подменю
+        :param menu_id: ID меню
         :param submenu_info: Информация о подменю.
         :return: None
         """
@@ -335,19 +337,20 @@ class CacheRepository:
         )
 
     async def delete_submenu_cache(self,
-                                   menu_id,
-                                   submenu_id):
+                                   menu_id: str,
+                                   submenu_id: str) -> None:
         """
         Удаление кеша в связи с удалением блюда из БД
 
-        :param submenu_info: Информация об удаляемом подменю
+        :param submenu_id:
+        :param menu_id:
         :return: None
         """
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}'
         )
 
-    async def get_all_menus_cache(self):
+    async def get_all_menus_cache(self) -> list[Menu] | None:
         """
         Получение всех подменю из кеша.
 
@@ -362,7 +365,7 @@ class CacheRepository:
         return None
 
     async def set_all_menus_cache(self,
-                                  menu_list):
+                                  menu_list: list[Menu]) -> None:
         """
         Запись всех подменю в кеш.
 
@@ -383,12 +386,12 @@ class CacheRepository:
         )
 
     async def get_menu_cache(self,
-                             menu_id):
+                             menu_id: str) -> Menu | None:
         """
-        Получение информации об одном подменю из кеша
+        Получение информации об одном меню из кеша
 
-        :param menu_id: ID меню, в котором находится искомое подменю.
-        :return: Информация о подменю или None, если нет в кеше.
+        :param menu_id: ID меню.
+        :return: Информация о меню или None, если нет в кеше.
         """
         cache = await self.redis_cacher.get(
             f'/menus/{menu_id}'
@@ -398,12 +401,12 @@ class CacheRepository:
         return None
 
     async def set_menu_cache(self,
-                             menu_id,
-                             menu_info):
+                             menu_id: str,
+                             menu_info: Menu) -> None:
         """
-        Запись информации о подменю в кеш
+        Запись информации о меню в кеш
 
-        :param menu_id:
+        :param menu_id: ID меню
         :param menu_info: Информация о меню.
         :return: None.
         """
@@ -414,16 +417,12 @@ class CacheRepository:
         )
 
     async def create_new_menu_cache(self,
-                                    menu_info):
+                                    menu_info: Menu) -> None:
         """
-        Создание новой записи о подменю в кеше.
+        Создание новой записи о меню в кеше.
 
-        Если в БД происходит внесение изменений (в т.ч добавление нового подменю),
-        то должно происходить обновление кеша для всех подменю, не задевая кеш для
-        конкретных подменю
-
-        Происходит удаление кеша для списка всех подменю, и создается кеш для создаваемого
-        подменю.
+        Происходит очистка неактуального кеша, и создается кеш для создаваемого
+        меню.
 
         :param menu_info:
         :return: None
@@ -437,16 +436,13 @@ class CacheRepository:
         )
 
     async def update_menu_cache(self,
-                                menu_info,
-                                menu_id: str):
+                                menu_info: Menu,
+                                menu_id: str) -> None:
         """
-        Обновление кеша конкретного подменю при изменении этого подменю в БД.
+        Обновление кеша конкретного меню при изменении этого меню в БД.
 
-        Если в БД происходит внесение изменений (в т.ч изменение существующего подменю),
-        то должно происходить обновление кеша для данного конкретного подменю
-
-        Происходит удаление кеша для данного подменю, повторное создание кеша для данного
-        подменю.
+        Происходит очистка неактуального кеша, а затем повторное создание кеша для данного
+        меню.
 
         :param menu_id:
         :param menu_info: Информация о подменю.
@@ -461,9 +457,9 @@ class CacheRepository:
         )
 
     async def delete_menu_cache(self,
-                                menu_id):
+                                menu_id: str) -> None:
         """
-        Удаление кеша в связи с удалением блюда из БД
+        Удаление кеша в связи с удалением меню из БД
 
         :param menu_id:
         :return: None

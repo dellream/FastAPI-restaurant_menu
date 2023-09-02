@@ -6,10 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from app.config import DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER, REDIS_URL
-
-# Формируем URL для подключения
-SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+from app.config import REDIS_URL, SQLALCHEMY_DATABASE_URL
 
 metadata = MetaData()
 Base = declarative_base()

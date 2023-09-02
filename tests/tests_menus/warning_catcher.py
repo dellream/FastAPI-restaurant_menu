@@ -9,6 +9,7 @@ import warnings
 
 def log_warnings(logger):
     def decorator(func):
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             with WarningCollector() as collector:
