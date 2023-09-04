@@ -64,7 +64,6 @@ async def dish_id(menu_id, submenu_id):
 
 class TestMenu:
     # Создает меню
-    @pytest.mark.order(1)
     @pytest.mark.asyncio
     async def test_create_menu(self, http_client):
         url = f'{DOCKER_URL}/menus/'
@@ -84,7 +83,6 @@ class TestMenu:
             assert response.json()['description'] == data['description']
 
     # Создает подменю
-    @pytest.mark.order(2)
     @pytest.mark.asyncio
     async def test_create_submenu(self, http_client, menu_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/submenus/'
@@ -103,7 +101,6 @@ class TestMenu:
             )
 
     # Создает два блюда
-    @pytest.mark.order(3)
     @pytest.mark.asyncio
     async def test_create_two_dishes(self, http_client, menu_id, submenu_id):
         dishes_data = [
@@ -131,7 +128,6 @@ class TestMenu:
                 assert response.json()['price'] == data['price']
 
     # Смотрит список всех меню
-    @pytest.mark.order(4)
     @pytest.mark.asyncio
     async def test_read_all_menus(self, http_client):
         url = f'{DOCKER_URL}/menus/'
@@ -141,7 +137,6 @@ class TestMenu:
             assert isinstance(response.json(), list)
 
     # Смотрит определенное меню
-    @pytest.mark.order(5)
     @pytest.mark.asyncio
     async def test_read_menu(self, http_client):
         url = f'{DOCKER_URL}/menus/{menu_id}/'
@@ -155,7 +150,6 @@ class TestMenu:
             assert 'dishes_count' in response.json()
 
     # Смотрит список всех подменю
-    @pytest.mark.order(6)
     @pytest.mark.asyncio
     async def test_read_all_submenus(self, http_client, menu_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/submenus/'
@@ -165,7 +159,6 @@ class TestMenu:
             assert isinstance(response.json(), list)
 
     # Смотрит определенное подменю
-    @pytest.mark.order(7)
     @pytest.mark.asyncio
     async def test_read_submenu(self, http_client, menu_id, submenu_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/'
@@ -178,7 +171,6 @@ class TestMenu:
             assert 'dishes_count' in response.json()
 
     # Смотрит список всех блюд
-    @pytest.mark.order(8)
     @pytest.mark.asyncio
     async def test_read_all_dishes(self, http_client, menu_id, submenu_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/'
@@ -188,7 +180,6 @@ class TestMenu:
             assert isinstance(response.json(), list)
 
     # Смотрит определенное меню
-    @pytest.mark.order(9)
     @pytest.mark.asyncio
     async def test_read_dish(self, http_client, menu_id, submenu_id, dish_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
@@ -201,7 +192,6 @@ class TestMenu:
             assert 'price' in response.json()
 
     # Обновляет определенное меню
-    @pytest.mark.order(10)
     @pytest.mark.asyncio
     async def test_update_menu(self, http_client, menu_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/'
@@ -216,7 +206,6 @@ class TestMenu:
             assert response.json()['description'] == data['description']
 
     # Обновляет определенное подменю
-    @pytest.mark.order(11)
     @pytest.mark.asyncio
     async def test_update_submenu(self, http_client, menu_id, submenu_id):
         assert menu_id is not None, 'ID меню не был сохранен'
@@ -235,7 +224,6 @@ class TestMenu:
             assert response.json()['description'] == data['description']
 
     # Обновляет определенное блюдо
-    @pytest.mark.order(12)
     @pytest.mark.asyncio
     async def test_update_dish(self, http_client, menu_id, submenu_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
@@ -252,7 +240,6 @@ class TestMenu:
             assert response.json()['price'] == data['price']  # Приведение числа к строковому типу
 
     # Удаляет определенное блюдо
-    @pytest.mark.order(13)
     @pytest.mark.asyncio
     async def test_delete_dish(self, http_client, menu_id, submenu_id, dish_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
@@ -261,7 +248,6 @@ class TestMenu:
             assert response.status_code == 200
 
     # Удаляет определенное подменю
-    @pytest.mark.order(14)
     @pytest.mark.asyncio
     async def test_delete_submenu(self, http_client, menu_id, submenu_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/'
@@ -270,7 +256,6 @@ class TestMenu:
             assert response.status_code == 200
 
     # Проверяет список всех подменю после удаления
-    @pytest.mark.order(15)
     @pytest.mark.asyncio
     async def test_read_all_submenus_after_delete(self, http_client, menu_id, submenu_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/submenus/{submenu_id}/'
@@ -279,7 +264,6 @@ class TestMenu:
             assert (response.json() == []), 'Ожидался пустой список, сейчас список не пуст'
 
     # Удаляет определенное меню
-    @pytest.mark.order(16)
     @pytest.mark.asyncio
     async def test_delete_menu(self, http_client, menu_id):
         url = f'{DOCKER_URL}/menus/{menu_id}/'

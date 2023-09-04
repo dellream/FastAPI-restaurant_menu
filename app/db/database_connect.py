@@ -3,8 +3,7 @@ from typing import AsyncGenerator
 from aioredis import ConnectionPool, Redis
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.config import REDIS_URL, SQLALCHEMY_DATABASE_URL
 
