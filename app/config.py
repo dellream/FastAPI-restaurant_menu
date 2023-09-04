@@ -11,6 +11,7 @@ DB_PORT = os.environ.get('DB_PORT')
 DB_NAME = os.environ.get('DB_NAME')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
+DB_NAME_TEST = os.environ.get('DB_NAME_TEST')
 
 # Общие переменные (используются в тестах)
 BASE_URL = 'http://localhost:8000/api/v1'
@@ -28,6 +29,7 @@ EXPIRATION = 3600
 # DOCKER_POSTGRES_DBNAME = os.environ.get('DOCKER_POSTGRES_DBNAME')
 
 # Данные для database_connect
-# SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'  # Локальный
-SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://' \
-                          f'{DB_USER}:{DB_PASSWORD}@{DB_DOCKER_HOST}:{DB_PORT}/{DB_NAME}'  # Для Докера
+# Локальный:
+# SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+# Для Докера:
+SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_DOCKER_HOST}:{DB_PORT}/{DB_NAME}'
