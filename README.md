@@ -15,16 +15,22 @@
 
 1. Убедитесь, что у вас установлен Python версии 3.7 или выше.
 2. Клонируйте репозиторий с GitHub: `git clone https://github.com/dellream/REST-API-app_test_task.git`
-3. Запустите проект с помощью docker-compose `docker-compose up -d`
+3. Запустите проект с помощью docker-compose:
+```
+docker-compose up -d
+```
 
 ### Завершение работы
-Чтобы остановить и удалить контейнеры, выполните следующую команду: `docker-compose down`
+Эта команда остановит и удалит все контейнеры, тома и образы, связанные с вашим проектом в текущей директории:
+```
+docker-compose down -v --rmi all
+```
 
 ### Тестирование с помощью pytest
 
 Запустите тесты с помощью следующей команды (после завершения тестов, контейнеры будут остановлены, но не удалены):
 ```
-docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
+docker-compose -f docker-compose-pytest.yml up -d && docker logs --follow backend && docker compose -f docker-compose-pytest.yml down -v
 ```
 
 ### Тестирование с помощью POSTMAN
