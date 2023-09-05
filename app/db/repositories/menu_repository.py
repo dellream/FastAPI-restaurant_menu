@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy import distinct, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.db.database_connect import get_async_session
 from app.models.domain.menus_models import Dish, Menu, Submenu
@@ -96,3 +97,11 @@ class AsyncMenuRepository:
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail='menu not found')
+
+    async def get_full_restaurant_menu(self) -> list[Menu]:
+        """Получение полного списка всех меню, соответствующих подменю и соответствующих блюд"""
+        query = (await self.session.execute(
+            # При выполнении select в рамках одного запроса сразу же будут выводиться соответствующие подменю и блюда
+            select(Menu).options(selectinload(Menu.submenus).selectinload(Submenu.dishes))
+        )).scalars().fetchall()
+        return query

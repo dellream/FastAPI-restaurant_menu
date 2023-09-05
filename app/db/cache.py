@@ -467,3 +467,21 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}'
         )
+
+    async def set_full_restaurant_menu(self, items: list[Menu]) -> None:
+        """
+        Кеширование полного списка всех меню, соответствующих подменю и блюд
+        """
+        await self.redis_cacher.set('Full_restaurant_menu',
+                                    pickle.dumps(items),
+                                    ex=EXPIRATION)
+
+    async def get_full_restaurant_menu(self) -> list[Menu] | None:
+        """
+        Получение из кеша полного списка всех меню, соответствующих подменю и блюд
+        """
+        cache = await self.redis_cacher.get('Full_restaurant_menu')
+        if cache:
+            items = pickle.loads(cache)
+            return items
+        return None

@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from app.models.schemas.menus.dish_schemas import DishFullResponse
+
 
 class SubmenuBase(BaseModel):
     """Базовая схема подменю"""
@@ -22,3 +24,12 @@ class SubmenuCountResponse(SubmenuSchema):
     """Схема подменю для получения конкретного подменю"""
     id: str
     dishes_count: int
+
+
+class SubmenuFullResponse(SubmenuResponse):
+    """Схема для получения всех меню с раскрытием всех подменю и блюд"""
+    dishes: list[DishFullResponse]
+
+    class Config:
+        extra = 'ignore'
+        orm_mode = True

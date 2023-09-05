@@ -83,3 +83,17 @@ class AsyncMenuService:
             menu_id=menu_id
         )
         return deleted_menu
+
+    async def get_full_restaurant_menu(self,
+                                       background_tasks: BackgroundTasks) -> list[Menu]:
+        """
+        Получение полного списка всех меню, соответствующих подменю и соответствующих блюд
+        """
+        cache = await self.cache_repo.get_full_restaurant_menu()
+        if cache:
+            return cache
+        items = await self.menu_repo.get_full_restaurant_menu()
+        background_tasks.add_task(
+            self.cache_repo.set_full_restaurant_menu, items
+        )
+        return items
