@@ -349,6 +349,7 @@ class CacheRepository:
         :param menu_id:
         :return: None
         """
+        await self.delete_full_base_cache()
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}'
         )
@@ -454,6 +455,7 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}'
         )
+        await self.delete_full_base_cache()
         await self.set_menu_cache(
             menu_info=menu_info,
             menu_id=menu_id,
