@@ -185,6 +185,7 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_info.id}'
         )
+        await self.delete_full_base_cache()
         await self.set_dish_cache(
             dish_info=dish_info,
             submenu_id=submenu_id,
@@ -206,6 +207,7 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}'
         )
+        await self.delete_full_base_cache()
 
     async def get_all_submenus_cache(self,
                                      menu_id: str) -> list[Submenu] | None:
@@ -330,6 +332,7 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}'
         )
+        await self.delete_full_base_cache()
         await self.set_submenu_cache(
             submenu_info=submenu_info,
             menu_id=menu_id,
@@ -346,6 +349,7 @@ class CacheRepository:
         :param menu_id:
         :return: None
         """
+        await self.delete_full_base_cache()
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}'
         )
@@ -451,6 +455,7 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}'
         )
+        await self.delete_full_base_cache()
         await self.set_menu_cache(
             menu_info=menu_info,
             menu_id=menu_id,
@@ -467,3 +472,26 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}'
         )
+        await self.delete_full_base_cache()
+
+    async def set_full_restaurant_menu(self, items: list[Menu]) -> None:
+        """
+        Кеширование полного списка всех меню, соответствующих подменю и блюд
+        """
+        await self.redis_cacher.set('Full_restaurant_menu',
+                                    pickle.dumps(items),
+                                    ex=EXPIRATION)
+
+    async def get_full_restaurant_menu(self) -> list[Menu] | None:
+        """
+        Получение из кеша полного списка всех меню, соответствующих подменю и блюд
+        """
+        cache = await self.redis_cacher.get('Full_restaurant_menu')
+        if cache:
+            items = pickle.loads(cache)
+            return items
+        return None
+
+    async def delete_full_base_cache(self) -> None:
+        """Удаление древовидной структуры базы из кеша."""
+        await self.redis_cacher.delete('Full_restaurant_menu')

@@ -13,6 +13,7 @@ from starlette import status
 from app.api.menus.services.menu_service import AsyncMenuService
 from app.models.schemas.menus.menu_schemas import (
     MenuCountResponse,
+    MenuFullResponse,
     MenuResponse,
     MenuSchema,
 )
@@ -72,3 +73,12 @@ async def delete_menu(menu_id: str,
                       menu_service: AsyncMenuService = Depends()) -> MenuResponse:
     """Удаляет определенное меню по ID"""
     return await menu_service.delete_menu(menu_id, background_tasks)
+
+
+@menu_router.get('/full_restaurant_menu',
+                 response_model=list[MenuFullResponse],
+                 summary='Полная структура всего меню ресторана')
+async def get_full_restaurant_menu(background_tasks: BackgroundTasks,
+                                   menu_service: AsyncMenuService = Depends()) -> list[MenuFullResponse]:
+    """Получение полного списка всех меню, соответствующих подменю и соответствующих блюд"""
+    return await menu_service.get_full_restaurant_menu(background_tasks)
