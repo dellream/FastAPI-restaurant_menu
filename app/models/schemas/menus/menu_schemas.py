@@ -33,4 +33,4 @@ class MenuFullResponse(MenuResponse):
 
     class Config:
         extra = 'ignore'
-        orm_mode = True
+        from_attributes = True
