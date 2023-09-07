@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any
 
 import httpx
@@ -9,6 +10,17 @@ from app.main import app
 
 pytest_plugins = 'tests.tests_menus.fixtures'
 client = TestClient(app)
+
+
+@pytest.fixture(scope='session')
+def event_loop():
+    """Создает экземпляр стандартного цикла событий для каждого тестового случая."""
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope='class')

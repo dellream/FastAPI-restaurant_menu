@@ -1,17 +1,15 @@
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from app.config import BASE_URL
-from app.main import app
 
-client = TestClient(app)
 pytest_plugins = 'tests.tests_menus.fixtures'
 
 
 class TestMenu:
     # Создает меню
     @pytest.mark.asyncio
-    async def test_create_menu(self, http_client):
+    async def test_create_menu(self, http_client: AsyncClient):
         url = f'{BASE_URL}/menus/'
 
         data = {
