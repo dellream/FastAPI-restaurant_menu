@@ -18,7 +18,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app /project/app
 COPY migrations /project/migrations
 COPY tests /project/tests
-COPY pytest.ini /project/pytest.ini
 COPY alembic.ini /project/
 
 ENTRYPOINT ["bash", "-c", "alembic upgrade head && pytest tests"]
