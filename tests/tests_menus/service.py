@@ -24,21 +24,25 @@ from app.main import app
 
 def get_routes() -> dict[str, str]:
     """Получение словаря с маршрутами приложения."""
-    routes = {}
+    routes_dict = {}
 
     # Пройдемся по всем маршрутам в приложении и сформируем словарь
     for route in app.routes:
         if isinstance(route, APIRoute):
-            routes[route.endpoint.__name__] = f'http://localhost:8000{route.path}'
-    return routes
+            routes_dict[route.endpoint.__name__] = f'http://localhost:8000{route.path}'
+    return routes_dict
 
 
 def reverse(foo: Callable,
-            routes: dict[str, str] = get_routes(),
+            routes_dict: dict[str, str] = get_routes(),
             **kwargs) -> str:
     """Получение url адреса."""
-    path = routes[foo.__name__]
+    path = routes_dict[foo.__name__]
     return path.format(**kwargs)
 
 
-get_routes()
+if __name__ == '__main__':
+    # Отобразим сформированный словарь
+    routes = get_routes()
+    for key, value in routes.items():
+        print(f'{key} : {value}')
