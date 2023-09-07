@@ -29,7 +29,7 @@ def get_routes() -> dict[str, str]:
     # Пройдемся по всем маршрутам в приложении и сформируем словарь
     for route in app.routes:
         if isinstance(route, APIRoute):
-            routes[route.endpoint.__name__] = route.path
+            routes[route.endpoint.__name__] = f'http://localhost:8000{route.path}'
     return routes
 
 
@@ -39,3 +39,6 @@ def reverse(foo: Callable,
     """Получение url адреса."""
     path = routes[foo.__name__]
     return path.format(**kwargs)
+
+
+get_routes()
