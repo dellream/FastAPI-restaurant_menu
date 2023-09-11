@@ -34,3 +34,10 @@ REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'  # Локальный
 SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 # Для Докера:
 # SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_DOCKER_HOST}:{DB_PORT}/{DB_NAME}'
+
+# Данные для celery и rabbitmq
+RABBITMQ_DEFAULT_USER = os.getenv('RABBITMQ_DEFAULT_USER')
+RABBITMQ_DEFAULT_PASS = os.getenv('RABBITMQ_DEFAULT_PASS')
+RABBITMQ_DEFAULT_PORT = os.getenv('RABBITMQ_DEFAULT_PORT')
+RABBITMQ_HOST = os.getenv('RABBITMQ_HOST')
+CELERY_STATUS = os.getenv('CELERY_STATUS') == 'true'
