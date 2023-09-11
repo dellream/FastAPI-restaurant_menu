@@ -41,3 +41,7 @@ RABBITMQ_DEFAULT_PASS = os.getenv('RABBITMQ_DEFAULT_PASS')
 RABBITMQ_DEFAULT_PORT = os.getenv('RABBITMQ_DEFAULT_PORT')
 RABBITMQ_HOST = os.getenv('RABBITMQ_HOST')
 CELERY_STATUS = os.getenv('CELERY_STATUS') == 'true'
+# Для Докера:
+# MENU_FILE_PATH = '/project/app/admin/Menu.xlsx'
+# Локальный:
+MENU_FILE_PATH = '/app/admin/Menu.xlsx'
