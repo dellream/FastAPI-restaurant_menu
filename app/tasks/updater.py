@@ -53,7 +53,13 @@ class BaseUpdaterRepo:
         Выполняет POST-запрос для добавления новых меню в базу данных.
         Принимает данные о меню в качестве аргумента и отправляет их на сервер.
         """
-        pass
+        url = f'{BASE_URL}/menus/'
+        data = {
+            'id': menu['id'],
+            'title': menu['title'],
+            'description': menu['description'],
+        }
+        requests.post(url, json=data)
 
     def post_submenu(
             self,
@@ -64,7 +70,13 @@ class BaseUpdaterRepo:
         Выполняет POST-запрос для добавления новых подменю в базу данных.
         Принимает данные о подменю в качестве аргумента и отправляет их на сервер.
         """
-        pass
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/'
+        data = {
+            'id': submenu['id'],
+            'title': submenu['title'],
+            'description': submenu['description'],
+        }
+        requests.post(url, json=data)
 
     def post_submenus_batch(
             self,
@@ -75,7 +87,11 @@ class BaseUpdaterRepo:
         Выполняет POST-запрос для добавления новых подменю в базу данных (постит новые подменю в базу списком).
         Принимает данные о подменю в качестве аргумента и отправляет их на сервер.
         """
-        pass
+        for submenu in submenus:
+            self.post_submenu(
+                submenu=submenu,
+                menu_id=menu_id,
+            )
 
     def post_dish(
             self,
@@ -87,7 +103,15 @@ class BaseUpdaterRepo:
         Выполняет POST-запрос для добавления новых блюд в базу данных.
         Принимает данные о блюдах в качестве аргумента и отправляет их на сервер.
         """
-        pass
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes'
+        data = {
+            'id': dish['id'],
+            'title': dish['title'],
+            'description': dish['description'],
+            'price': dish['price'],
+            'discount': dish['discount'],
+        }
+        requests.post(url, json=data)
 
     def post_dishes_batch(
             self,
@@ -99,7 +123,12 @@ class BaseUpdaterRepo:
         Выполняет POST-запрос для добавления новых блюд в базу данных (постит новые блюда в базу списком).
         Принимает данные о блюдах в качестве аргумента и отправляет их на сервер.
         """
-        pass
+        for dish in dishes:
+            self.post_dish(
+                dish=dish,
+                submenu_id=submenu_id,
+                menu_id=menu_id,
+            )
 
     def patch_menu(self, menu: dict[str, str | list]) -> None:
         """
@@ -108,13 +137,22 @@ class BaseUpdaterRepo:
         Сравнивает данные, полученные из файла Excel, с данными в базе данных и, если есть различия,
         обновляют соответствующие записи.
         """
-        pass
+        data = {
+            'title': menu['title'],
+            'description': menu['description'],
+        }
+        url = f'{BASE_URL}/menus/{menu["id"]}'
+        requests.patch(url, json=data)
 
     def check_menu(self, menu: dict[str, str | list]) -> None:
         """
         Проверить состояние меню в базе и по необходимости обновить.
         """
-        pass
+        url = f'{BASE_URL}/menus/{menu["id"]}'
+        current_menu = requests.get(url).json()
+        if current_menu['title'] != menu['title'] or \
+                current_menu['description'] != menu['description']:
+            self.patch_menu(menu=menu)
 
     def patch_submenu(
             self,
@@ -127,7 +165,12 @@ class BaseUpdaterRepo:
         Сравнивает данные, полученные из файла Excel, с данными в базе данных и, если есть различия,
         обновляют соответствующие записи.
         """
-        pass
+        data = {
+            'title': submenu['title'],
+            'description': submenu['description'],
+        }
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu["id"]}'
+        requests.patch(url, json=data)
 
     def check_submenu(
             self,
