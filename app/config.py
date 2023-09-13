@@ -44,4 +44,4 @@ CELERY_STATUS = os.getenv('CELERY_STATUS') == 'true'
 # Для Докера:
 # MENU_FILE_PATH = '/project/app/admin/Menu.xlsx'
 # Локальный:
-MENU_FILE_PATH = '/app/admin/Menu.xlsx'
+MENU_FILE_PATH = 'app/admin/Menu.xlsx'
