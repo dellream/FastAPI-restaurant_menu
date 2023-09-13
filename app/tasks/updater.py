@@ -16,32 +16,29 @@ class BaseUpdaterRepo:
     def __init__(self, parser_data: list[dict]):
         self.parser_data = parser_data
 
-    @staticmethod
-    def get_menus_from_db() -> list[str]:
+    def get_menus_from_db(self) -> list[str]:
         """
         Выполняет запросы к базе данных, чтобы получить список ID существующих меню.
         """
-        url = f'{BASE_URL}/menus'
+        url = f'{BASE_URL}/menus/'
         response = requests.get(url).json()
         menus_id = []
         for i in response:
             menus_id.append(i['id'])
         return menus_id
 
-    @staticmethod
-    def get_submenus_from_db(menu_id: str) -> list[str]:
+    def get_submenus_from_db(self, menu_id: str) -> list[str]:
         """Выполняет запросы к базе данных, чтобы получить список ID существующих подменю."""
-        url = f'{BASE_URL}/menus/{menu_id}/submenus'
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/'
         response = requests.get(url).json()
         submenus_id = []
         for i in response:
             submenus_id.append(i['id'])
         return submenus_id
 
-    @staticmethod
-    def get_dishes_from_db(menu_id: str, submenu_id: str) -> list[str]:
+    def get_dishes_from_db(self, menu_id: str, submenu_id: str) -> list[str]:
         """Выполняет запросы к базе данных, чтобы получить список ID блюд."""
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes'
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/'
         response = requests.get(url).json()
         dishes_id = []
         for i in response:
@@ -103,13 +100,13 @@ class BaseUpdaterRepo:
         Выполняет POST-запрос для добавления новых блюд в базу данных.
         Принимает данные о блюдах в качестве аргумента и отправляет их на сервер.
         """
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes'
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/'
         data = {
             'id': dish['id'],
             'title': dish['title'],
             'description': dish['description'],
             'price': dish['price'],
-            'discount': dish['discount'],
+            # 'discount': dish['discount'],
         }
         requests.post(url, json=data)
 
@@ -141,14 +138,14 @@ class BaseUpdaterRepo:
             'title': menu['title'],
             'description': menu['description'],
         }
-        url = f'{BASE_URL}/menus/{menu["id"]}'
+        url = f'{BASE_URL}/menus/{menu["id"]}/'
         requests.patch(url, json=data)
 
     def check_menu(self, menu: dict[str, str | list]) -> None:
         """
         Проверить состояние меню в базе и по необходимости обновить.
         """
-        url = f'{BASE_URL}/menus/{menu["id"]}'
+        url = f'{BASE_URL}/menus/{menu["id"]}/'
         current_menu = requests.get(url).json()
         if current_menu['title'] != menu['title'] or \
                 current_menu['description'] != menu['description']:
@@ -169,7 +166,7 @@ class BaseUpdaterRepo:
             'title': submenu['title'],
             'description': submenu['description'],
         }
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu["id"]}'
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu["id"]}/'
         requests.patch(url, json=data)
 
     def check_submenu(
@@ -178,7 +175,7 @@ class BaseUpdaterRepo:
             menu_id: str,
     ) -> None:
         """Проверить состояние подменю в базе и по необходимости обновить."""
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu["id"]}'
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu["id"]}/'
         current_submenu = requests.get(url).json()
         if current_submenu['title'] != submenu['title'] or \
                 current_submenu['description'] != submenu['description']:
@@ -195,9 +192,9 @@ class BaseUpdaterRepo:
             'title': dish['title'],
             'description': dish['description'],
             'price': dish['price'],
-            'discount': dish['discount'],
+            # 'discount': dish['discount'],
         }
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish["id"]}'
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish["id"]}/'
         requests.patch(url, json=data)
 
     def check_dish(
@@ -211,16 +208,17 @@ class BaseUpdaterRepo:
         Сравнивает данные, полученные из файла Excel, с данными в базе данных и, если есть различия,
         обновляют соответствующие записи.
         """
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish["id"]}'
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish["id"]}/'
         current_dish = requests.get(url).json()
         # Учтем скидку, которая пока не реализована
-        price = str(round(
-            float(dish['price']) * (1 - current_dish['discount'] / 100), 2
-        ))
+        # price = str(round(
+        #     float(dish['price']) * (1 - current_dish['discount'] / 100), 2
+        # ))
+
         if current_dish['title'] != dish['title'] or \
                 current_dish['description'] != dish['description'] or \
-                current_dish['price'] != price or \
-                current_dish['discount'] != dish['discount']:
+                current_dish['price'] != dish['price']:
+            # current_dish['discount'] != dish['discount']:
             self.patch_dish(
                 dish=dish,
                 submenu_id=submenu_id,
@@ -231,21 +229,21 @@ class BaseUpdaterRepo:
         """
         Выполняет DELETE-запросы для удаления меню из базы данных.
         """
-        url = f'{BASE_URL}/menus/{menu_id}'
+        url = f'{BASE_URL}/menus/{menu_id}/'
         requests.delete(url)
 
     def delete_submenu(self, submenu_id: str, menu_id: str) -> None:
         """
         Выполняет DELETE-запросы для удаления подменю из базы данных.
         """
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}'
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/'
         requests.delete(url)
 
     def delete_dish(self, dish_id: str, menu_id: str, submenu_id: str) -> None:
         """
         Выполняет DELETE-запросы для удаления блюд из базы данных.
         """
-        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}'
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}/'
         requests.delete(url)
 
     def check_dishes(

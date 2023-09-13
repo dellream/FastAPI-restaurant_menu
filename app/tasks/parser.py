@@ -23,7 +23,7 @@ class ParserRepo:
         # Создаем словарь
         dish: dict[str, str | int] = {}
         # Выставляем диапазон рассматриваемых ячеек
-        cells: list[Cell] = self.sheet[f'C{row}':'F{row}'][0]  # type: ignore
+        cells: list[Cell] = self.sheet[f'C{row}':f'F{row}'][0]  # type: ignore
         dish['id'] = cells[0].value
         dish['title'] = cells[1].value
         dish['description'] = cells[2].value
