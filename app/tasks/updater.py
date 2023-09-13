@@ -178,7 +178,11 @@ class BaseUpdaterRepo:
             menu_id: str,
     ) -> None:
         """Проверить состояние подменю в базе и по необходимости обновить."""
-        pass
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu["id"]}'
+        current_submenu = requests.get(url).json()
+        if current_submenu['title'] != submenu['title'] or \
+                current_submenu['description'] != submenu['description']:
+            self.patch_submenu(submenu=submenu, menu_id=menu_id)
 
     def patch_dish(
             self,
@@ -187,7 +191,14 @@ class BaseUpdaterRepo:
             menu_id: str,
     ) -> None:
         """Обновить данные о блюде в базе."""
-        pass
+        data = {
+            'title': dish['title'],
+            'description': dish['description'],
+            'price': dish['price'],
+            'discount': dish['discount'],
+        }
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish["id"]}'
+        requests.patch(url, json=data)
 
     def check_dish(
             self,
@@ -200,25 +211,42 @@ class BaseUpdaterRepo:
         Сравнивает данные, полученные из файла Excel, с данными в базе данных и, если есть различия,
         обновляют соответствующие записи.
         """
-        pass
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish["id"]}'
+        current_dish = requests.get(url).json()
+        # Учтем скидку, которая пока не реализована
+        price = str(round(
+            float(dish['price']) * (1 - current_dish['discount'] / 100), 2
+        ))
+        if current_dish['title'] != dish['title'] or \
+                current_dish['description'] != dish['description'] or \
+                current_dish['price'] != price or \
+                current_dish['discount'] != dish['discount']:
+            self.patch_dish(
+                dish=dish,
+                submenu_id=submenu_id,
+                menu_id=menu_id,
+            )
 
     def delete_menu(self, menu_id: str) -> None:
         """
         Выполняет DELETE-запросы для удаления меню из базы данных.
         """
-        pass
+        url = f'{BASE_URL}/menus/{menu_id}'
+        requests.delete(url)
 
     def delete_submenu(self, submenu_id: str, menu_id: str) -> None:
         """
         Выполняет DELETE-запросы для удаления подменю из базы данных.
         """
-        pass
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}'
+        requests.delete(url)
 
     def delete_dish(self, dish_id: str, menu_id: str, submenu_id: str) -> None:
         """
         Выполняет DELETE-запросы для удаления блюд из базы данных.
         """
-        pass
+        url = f'{BASE_URL}/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}'
+        requests.delete(url)
 
     def check_dishes(
             self,
@@ -230,7 +258,26 @@ class BaseUpdaterRepo:
         Выполняет сравнение данных из файла Excel с данными в базе данных и
         вызывает соответствующие методы для создания, обновления и удаления записей в базе данных.
         """
-        pass
+        dishes_id = self.get_dishes_from_db(
+            menu_id=menu_id,
+            submenu_id=submenu_id,
+        )
+        for dish in dishes:
+            if dish['id'] not in dishes_id:
+                self.post_dish(
+                    dish=dish,
+                    submenu_id=submenu_id,
+                    menu_id=menu_id,
+                )
+            else:
+                self.check_dish(dish, submenu_id, menu_id)
+                dishes_id.remove(dish['id'])
+        for dish_id in dishes_id:
+            self.delete_dish(
+                dish_id=dish_id,
+                menu_id=menu_id,
+                submenu_id=submenu_id,
+            )
 
     def check_submenus(
             self,
@@ -241,14 +288,65 @@ class BaseUpdaterRepo:
         Выполняет сравнение данных из файла Excel с данными в базе данных и
         вызывает соответствующие методы для создания, обновления и удаления записей в базе данных.
         """
-        pass
+        submenus_id = self.get_submenus_from_db(menu_id)
+        for submenu in submenus:
+            if submenu['id'] not in submenus_id:
+                self.post_submenu(
+                    submenu=submenu,
+                    menu_id=menu_id,
+                )
+                self.post_dishes_batch(
+                    dishes=submenu['dishes'],
+                    submenu_id=submenu['id'],
+                    menu_id=menu_id,
+                )
+            else:
+                self.check_submenu(
+                    submenu=submenu,
+                    menu_id=menu_id,
+                )
+                if submenu['dishes']:
+                    self.check_dishes(
+                        dishes=submenu['dishes'],
+                        menu_id=menu_id,
+                        submenu_id=submenu['id'],
+                    )
+                submenus_id.remove(submenu['id'])
+        for submenu_id in submenus_id:
+            self.delete_submenu(
+                submenu_id=submenu_id,
+                menu_id=menu_id,
+            )
 
     def check_menus(self) -> None:
         """
         Выполняет сравнение данных из файла Excel с данными в базе данных и
         вызывает соответствующие методы для создания, обновления и удаления записей в базе данных.
         """
-        pass
+        menus_id = self.get_menus_from_db()
+        for menu in self.parser_data:
+            if menu['id'] not in menus_id:
+                self.post_menu(menu=menu)
+                self.post_submenus_batch(
+                    submenus=menu['submenus'],
+                    menu_id=menu['id'],
+                )
+                for submenu in menu['submenus']:
+                    self.post_dishes_batch(
+                        dishes=submenu['dishes'],
+                        submenu_id=submenu['id'],
+                        menu_id=menu['id'],
+                    )
+            else:
+                self.check_menu(menu=menu)
+                if menu['submenus']:
+                    self.check_submenus(
+                        submenus=menu['submenus'],
+                        menu_id=menu['id'],
+                    )
+                menus_id.remove(menu['id'])
+        for menu_id in menus_id:
+            self.delete_menu(menu_id=menu_id)
 
     def run(self) -> None:
         """Запустить обновление данных в базе."""
