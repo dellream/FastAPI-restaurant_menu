@@ -4,6 +4,8 @@
 Парсер взаимодействует с объектом файла посредством
 библиотеки openyxl.
 """
+import json
+
 from openpyxl import load_workbook
 from openpyxl.cell.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
@@ -24,7 +26,7 @@ class ParserRepo:
         dish: dict[str, str | int] = {}
         # Выставляем диапазон рассматриваемых ячеек
         cells: list[Cell] = self.sheet[f'C{row}':f'F{row}'][0]  # type: ignore
-        dish['id'] = cells[0].value
+        dish['id'] = str(cells[0].value)
         dish['title'] = cells[1].value
         dish['description'] = cells[2].value
         dish['price'] = str(cells[3].value).replace(',', '.')
@@ -41,7 +43,7 @@ class ParserRepo:
         }
         # Выставляем диапазон рассматриваемых ячеек
         cells: list[Cell] = self.sheet[f'B{row}':f'D{row}'][0]  # type: ignore
-        submenu['id'] = cells[0].value
+        submenu['id'] = str(cells[0].value)
         submenu['title'] = cells[1].value
         submenu['description'] = cells[2].value
         for i in range(row + 1, max_row + 1):
@@ -60,7 +62,7 @@ class ParserRepo:
         }
         # Выставляем диапазон рассматриваемых ячеек
         cells: list[Cell] = self.sheet[f'A{row}':f'C{row}'][0]  # type: ignore
-        menu['id'] = cells[0].value
+        menu['id'] = str(cells[0].value)
         menu['title'] = cells[1].value
         menu['description'] = cells[2].value
         for i in range(row + 1, max_row + 1):
@@ -78,4 +80,16 @@ class ParserRepo:
             if self.sheet[f'A{i}'].value:
                 self.parse_result.append(self.make_menu(i, self.sheet.max_row))
 
+        # Добавляем вывод в консоль или в логи
+        for inform in self.parse_result:
+            print('Parsed item:')
+            print(json.dumps(inform, indent=4))  # Вывод в консоль
+
         return self.parse_result
+
+
+if __name__ == '__main__':
+    parser = ParserRepo()
+    parsed_data = parser.parser()
+    for item in parsed_data:
+        print(item)
