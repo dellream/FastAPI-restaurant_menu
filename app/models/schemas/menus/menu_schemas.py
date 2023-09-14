@@ -5,19 +5,17 @@ from app.models.schemas.menus.submenu_schemas import SubmenuFullResponse
 
 class MenuBase(BaseModel):
     """Базовая схема для основного меню."""
-
     title: str
     description: str | None
 
 
 class MenuSchema(MenuBase):
     """Основная схема для работы с меню"""
-    ...
+    id: str | None = None
 
 
 class MenuResponse(MenuSchema):
     """Схема для получения ответа от эндпоинтов"""
-
     id: str | None
 
 

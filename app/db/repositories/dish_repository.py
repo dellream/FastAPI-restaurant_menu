@@ -23,11 +23,19 @@ class AsyncDishRepository:
                           dish: DishSchema) -> Dish:
         """Добавление нового блюда"""
         try:
-            dish_obj = Dish(title=dish.title,
-                            description=dish.description,
-                            submenu_id=submenu_id,
-                            price=dish.price)
-            dish_obj.id = str(uuid.uuid4())
+            custom_id = dish.id
+            if custom_id:
+                dish_obj = Dish(id=custom_id,
+                                title=dish.title,
+                                description=dish.description,
+                                submenu_id=submenu_id,
+                                price=dish.price)
+            else:
+                dish_obj = Dish(title=dish.title,
+                                description=dish.description,
+                                submenu_id=submenu_id,
+                                price=dish.price)
+                dish_obj.id = str(uuid.uuid4())
             self.session.add(dish_obj)
             await self.session.commit()
             await self.session.refresh(dish_obj)

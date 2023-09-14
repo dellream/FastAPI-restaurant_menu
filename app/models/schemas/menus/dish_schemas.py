@@ -10,7 +10,7 @@ class DishBase(BaseModel):
 
 class DishSchema(DishBase):
     """Основная схема блюда"""
-    ...
+    id: str | None = None
 
 
 class DishResponse(DishSchema):

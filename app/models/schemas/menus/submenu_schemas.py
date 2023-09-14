@@ -11,7 +11,7 @@ class SubmenuBase(BaseModel):
 
 class SubmenuSchema(SubmenuBase):
     """Основная схема подменю"""
-    ...
+    id: str | None = None
 
 
 class SubmenuResponse(SubmenuSchema):

@@ -22,8 +22,13 @@ class AsyncMenuRepository:
     async def create_menu(self, menu: MenuSchema) -> Menu:
         """Добавление нового меню"""
         try:
-            menu_obj = Menu(title=menu.title, description=menu.description)
-            menu_obj.id = str(uuid.uuid4())
+            custom_id = menu.id
+            if custom_id:
+                menu_obj = Menu(id=custom_id, title=menu.title, description=menu.description)
+            else:
+                menu_obj = Menu(title=menu.title, description=menu.description)
+                menu_obj.id = str(uuid.uuid4())
+
             self.session.add(menu_obj)
             await self.session.commit()
             await self.session.refresh(menu_obj)
