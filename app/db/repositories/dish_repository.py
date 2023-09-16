@@ -2,7 +2,6 @@ import uuid
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database_connect import get_async_session
@@ -19,30 +18,27 @@ class AsyncDishRepository:
 
     # Доработать репозиторий, не должно быть блюд с одинаковыми названиями
     async def create_dish(self,
+                          menu_id: str,
                           submenu_id: str,
                           dish: DishSchema) -> Dish:
         """Добавление нового блюда"""
-        try:
-            custom_id = dish.id
-            if custom_id:
-                dish_obj = Dish(id=custom_id,
-                                title=dish.title,
-                                description=dish.description,
-                                submenu_id=submenu_id,
-                                price=dish.price)
-            else:
-                dish_obj = Dish(title=dish.title,
-                                description=dish.description,
-                                submenu_id=submenu_id,
-                                price=dish.price)
-                dish_obj.id = str(uuid.uuid4())
-            self.session.add(dish_obj)
-            await self.session.commit()
-            await self.session.refresh(dish_obj)
-            return dish_obj
-        except IntegrityError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail='dish with this title already exists')
+        custom_id = dish.id
+        if custom_id:
+            dish_obj = Dish(id=custom_id,
+                            title=dish.title,
+                            description=dish.description,
+                            submenu_id=submenu_id,
+                            price=dish.price)
+        else:
+            dish_obj = Dish(title=dish.title,
+                            description=dish.description,
+                            submenu_id=submenu_id,
+                            price=dish.price)
+            dish_obj.id = str(uuid.uuid4())
+        self.session.add(dish_obj)
+        await self.session.commit()
+        await self.session.refresh(dish_obj)
+        return dish_obj
 
     async def read_all_dishes(self,
                               submenu_id: str) -> list[Dish]:

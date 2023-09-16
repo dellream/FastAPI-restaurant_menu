@@ -1,4 +1,5 @@
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from sqlalchemy.orm.exc import FlushError, NoResultFound
 from starlette import status
 
 from app.api.menus.services.dish_service import AsyncDishService
@@ -16,13 +17,23 @@ dish_router = APIRouter(
                   summary='Создать блюдо в подменю')
 async def create_dish(background_tasks: BackgroundTasks,
                       dish: DishSchema,
+                      menu_id: str,
                       submenu_id: str,
                       dish_service: AsyncDishService = Depends()) -> DishResponse:
-    return await dish_service.create_dish(
-        submenu_id=submenu_id,
-        dish=dish,
-        background_tasks=background_tasks
-    )
+    try:
+        return await dish_service.create_dish(
+            menu_id=menu_id,
+            submenu_id=submenu_id,
+            dish=dish,
+            background_tasks=background_tasks
+        )
+    except FlushError as error:
+        raise HTTPException(status_code=400, detail=error.args[0])
+    except NoResultFound as error:
+        raise HTTPException(
+            status_code=404,
+            detail=error.args[0],
+        )
 
 
 @dish_router.get('/',

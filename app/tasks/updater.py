@@ -25,6 +25,8 @@ class BaseUpdaterRepo:
         menus_id = []
         for i in response:
             menus_id.append(i['id'])
+        print('get_menus_from_db response:', response)
+        print(menus_id)
         return menus_id
 
     def get_submenus_from_db(self, menu_id: str) -> list[str]:
@@ -34,6 +36,8 @@ class BaseUpdaterRepo:
         submenus_id = []
         for i in response:
             submenus_id.append(i['id'])
+        print('get_submenus_from_db response:', response)
+        print(submenus_id)
         return submenus_id
 
     def get_dishes_from_db(self, menu_id: str, submenu_id: str) -> list[str]:
@@ -43,6 +47,8 @@ class BaseUpdaterRepo:
         dishes_id = []
         for i in response:
             dishes_id.append(i['id'])
+        print('get_dishes_from_db response:', response)
+        print(dishes_id)
         return dishes_id
 
     def post_menu(self, menu: dict[str, str | list]) -> None:
@@ -57,6 +63,7 @@ class BaseUpdaterRepo:
             'description': menu['description'],
         }
         requests.post(url, json=data)
+        print('post_menu data:', data)
 
     def post_submenu(
             self,
@@ -74,6 +81,7 @@ class BaseUpdaterRepo:
             'description': submenu['description'],
         }
         requests.post(url, json=data)
+        print('post_submenu data:', data)
 
     def post_submenus_batch(
             self,
@@ -89,6 +97,7 @@ class BaseUpdaterRepo:
                 submenu=submenu,
                 menu_id=menu_id,
             )
+            print('post_submenus_batch submenu:', submenu)
 
     def post_dish(
             self,
@@ -105,10 +114,10 @@ class BaseUpdaterRepo:
             'id': dish['id'],
             'title': dish['title'],
             'description': dish['description'],
-            'price': dish['price'],
-            # 'discount': dish['discount'],
+            'price': dish['price']
         }
         requests.post(url, json=data)
+        print('post_dish data:', data)
 
     def post_dishes_batch(
             self,
@@ -126,6 +135,7 @@ class BaseUpdaterRepo:
                 submenu_id=submenu_id,
                 menu_id=menu_id,
             )
+            print('post_dishes_batch dish:', dish)
 
     def patch_menu(self, menu: dict[str, str | list]) -> None:
         """
