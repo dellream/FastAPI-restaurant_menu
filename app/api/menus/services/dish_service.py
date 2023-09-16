@@ -16,6 +16,7 @@ class AsyncDishService:
         self.cache_repo = cache_repo
 
     async def create_dish(self,
+                          menu_id: str,
                           submenu_id: str,
                           dish: DishSchema,
                           background_tasks: BackgroundTasks) -> Dish:
@@ -28,8 +29,7 @@ class AsyncDishService:
         (чтобы пользователь не ждали кеширования запросов) на кеширование
         данного блюда и инвалидацию списка всех блюд
         """
-        dish_info = await self.dish_repo.create_dish(submenu_id, dish)
-        menu_id = await self.dish_repo.get_menu_id_by_submenu_id(submenu_id)
+        dish_info = await self.dish_repo.create_dish(menu_id, submenu_id, dish)
         background_tasks.add_task(
             self.cache_repo.create_new_dish_cache,
             dish_info=dish_info,

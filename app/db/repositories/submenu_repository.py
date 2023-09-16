@@ -21,10 +21,17 @@ class AsyncSubmenuRepository:
     async def create_submenu(self, menu_id: str, submenu: SubmenuSchema) -> Submenu:
         """Добавление нового подменю"""
         try:
-            submenu_obj = Submenu(title=submenu.title,
-                                  description=submenu.description,
-                                  menu_id=menu_id)
-            submenu_obj.id = str(uuid.uuid4())
+            custom_id = submenu.id
+            if custom_id:
+                submenu_obj = Submenu(id=custom_id,
+                                      title=submenu.title,
+                                      description=submenu.description,
+                                      menu_id=menu_id)
+            else:
+                submenu_obj = Submenu(title=submenu.title,
+                                      description=submenu.description,
+                                      menu_id=menu_id)
+                submenu_obj.id = str(uuid.uuid4())
             self.session.add(submenu_obj)  # Добавляем сформированный объект в сессию
             await self.session.commit()
             await self.session.refresh(submenu_obj)

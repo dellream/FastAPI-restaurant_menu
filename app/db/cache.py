@@ -182,15 +182,22 @@ class CacheRepository:
         :param submenu_id: ID подменю.
         :return: None
         """
+        # Инвалидируем кеш для определенного блюда, которое изменилось
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_info.id}'
         )
-        await self.delete_full_base_cache()
+        # Удаляем кеш для списка всех блюд, так как одно блюдо изменилось,
+        # кеш неактуален становится
+        await self.delete_cache_by_mask(
+            link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/'
+        )
         await self.set_dish_cache(
             dish_info=dish_info,
             submenu_id=submenu_id,
             menu_id=menu_id,
         )
+
+        await self.delete_full_base_cache()
 
     async def delete_dish_cache(self,
                                 menu_id: str,
@@ -206,6 +213,9 @@ class CacheRepository:
         """
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}'
+        )
+        await self.delete_cache_by_mask(
+            link=f'/menus/{menu_id}/'
         )
         await self.delete_full_base_cache()
 
@@ -329,15 +339,24 @@ class CacheRepository:
         :param submenu_info: Информация о подменю.
         :return: None
         """
+        # Удалим кеш для данного подменю
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}'
         )
-        await self.delete_full_base_cache()
+
+        # Удалим кеш для списка подменю, так как одно подменю поменялось,
+        # и кеш стал неактуальным
+        await self.delete_cache_by_mask(
+            link=f'/menus/{menu_id}/submenus'
+        )
+
+        # Создадим новый кеш для подменю
         await self.set_submenu_cache(
             submenu_info=submenu_info,
             menu_id=menu_id,
             submenu_id=submenu_id
         )
+        await self.delete_full_base_cache()
 
     async def delete_submenu_cache(self,
                                    menu_id: str,
@@ -353,6 +372,7 @@ class CacheRepository:
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}/submenus/{submenu_id}'
         )
+        await self.redis_cacher.delete(f'/menus/{menu_id}')
 
     async def get_all_menus_cache(self) -> list[Menu] | None:
         """
@@ -452,14 +472,17 @@ class CacheRepository:
         :param menu_info: Информация о подменю.
         :return: None
         """
+        # Удалим кеш для списка всех меню, так как меню
+        # изменилось и кеш стал неактуальным
         await self.delete_cache_by_mask(
-            link=f'/menus/{menu_id}'
+            link='/menus'
         )
-        await self.delete_full_base_cache()
         await self.set_menu_cache(
             menu_info=menu_info,
             menu_id=menu_id,
         )
+
+        await self.delete_full_base_cache()
 
     async def delete_menu_cache(self,
                                 menu_id: str) -> None:
@@ -471,6 +494,9 @@ class CacheRepository:
         """
         await self.delete_cache_by_mask(
             link=f'/menus/{menu_id}'
+        )
+        await self.delete_cache_by_mask(
+            link='/menus/'
         )
         await self.delete_full_base_cache()
 
