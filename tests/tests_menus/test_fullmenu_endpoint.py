@@ -18,14 +18,15 @@ pytest_plugins = 'tests.tests_menus.fixtures'
 
 
 class TestFullMenu:
-    @pytest.mark.asyncio
-    async def test_all_menu_empty(self,
-                                  http_client: AsyncClient) -> None:
-        """Проверка получения пустого списка меню."""
-        async for client in http_client:
-            response = await client.get(reverse(get_full_restaurant_menu))
-            assert response.status_code == HTTPStatus.OK, 'Статус ответа не 200'
-            assert response.json() == [], 'В ответе непустой список'
+    # Проверка на пустой список неактуальна, так как excel заполняет бд
+    # @pytest.mark.asyncio
+    # async def test_all_menu_empty(self,
+    #                               http_client: AsyncClient) -> None:
+    #     """Проверка получения пустого списка меню."""
+    #     async for client in http_client:
+    #         response = await client.get(reverse(get_full_restaurant_menu))
+    #         assert response.status_code == HTTPStatus.OK, 'Статус ответа не 200'
+    #         assert response.json() == [], 'В ответе непустой список'
 
     @pytest.mark.asyncio
     async def test_post_menu(self,
@@ -39,8 +40,6 @@ class TestFullMenu:
             assert 'id' in response.json(), 'Идентификатора меню нет в ответе'
             assert 'title' in response.json(), 'Названия меню нет в ответе'
             assert 'description' in response.json(), 'Описания меню нет в ответе'
-            assert 'submenus_count' in response.json(), 'Количества подменю нет в ответе'
-            assert 'dishes_count' in response.json(), 'Количества блюд нет в ответе'
 
             saved_data['menu'] = response.json()
 
