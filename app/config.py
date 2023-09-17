@@ -22,18 +22,18 @@ EXPIRATION = 3600
 
 # Для переключения между докером и локалом необходимо закомментировать соответствующие переменные
 # Общие переменные (используются в тестах)
-BASE_URL = 'http://localhost:8000/api/v1'  # Локальный
-# BASE_URL = 'http://backend:8000/api/v1'  # Для докера
+# BASE_URL = 'http://localhost:8000/api/v1'  # Локальный
+BASE_URL = 'http://backend:8000/api/v1'  # Для докера
 
 # Переменные для подключения к Redis
-REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'  # Локальный
-# REDIS_URL = f'redis://redis:{REDIS_PORT}/0'  # Для докера
+# REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'  # Локальный
+REDIS_URL = f'redis://redis:{REDIS_PORT}/0'  # Для докера
 
 # Данные для database_connect
 # Локальный:
-SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+# SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 # Для Докера:
-# SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_DOCKER_HOST}:{DB_PORT}/{DB_NAME}'
+SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_DOCKER_HOST}:{DB_PORT}/{DB_NAME}'
 
 # Данные для celery и rabbitmq
 RABBITMQ_DEFAULT_USER = os.getenv('RABBITMQ_DEFAULT_USER')
@@ -42,6 +42,6 @@ RABBITMQ_DEFAULT_PORT = os.getenv('RABBITMQ_DEFAULT_PORT')
 RABBITMQ_HOST = os.getenv('RABBITMQ_HOST')
 CELERY_STATUS = os.getenv('CELERY_STATUS') == 'true'
 # Для Докера:
-# MENU_FILE_PATH = '/project/app/admin/Menu.xlsx'
+MENU_FILE_PATH = '/project/app/admin/Menu.xlsx'
 # Локальный:
-MENU_FILE_PATH = 'app/admin/Menu.xlsx'
+# MENU_FILE_PATH = 'app/admin/Menu.xlsx'
