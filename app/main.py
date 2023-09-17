@@ -3,8 +3,9 @@ from fastapi import FastAPI
 from app.api.menus.routers.dish_routers import dish_router as dish_routers
 from app.api.menus.routers.menu_routers import menu_router as menu_routers
 from app.api.menus.routers.submenu_routers import submenu_router as submenu_routers
-from app.config import CELERY_STATUS
-from app.tasks.tasks import update_base
+
+# from app.config import CELERY_STATUS
+# from app.tasks.tasks import update_base
 
 description = """
 REST API для работы с меню ресторана. 🚀
@@ -59,9 +60,9 @@ app.include_router(submenu_routers)
 app.include_router(dish_routers)
 
 
-@app.on_event('startup')
-async def on_startup():
-    """Выполняется при запуске приложения.
-    Инициализирует БД и запускает задачу обновления БД."""
-    if CELERY_STATUS:
-        update_base.delay()
+# @app.on_event('startup')
+# async def on_startup():
+#     """Выполняется при запуске приложения.
+#     Инициализирует БД и запускает задачу обновления БД."""
+#     if CELERY_STATUS:
+#         update_base.delay()
