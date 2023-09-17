@@ -6,16 +6,19 @@ services:
       dockerfile: Dockerfile
     container_name: backend
     restart: always
+#    volumes:
+#      - ./app/admin:/project/app/admin
     networks:
       - main_network
     ports:
       - "8000:8000"
-    #entrypoint: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+#      rabbitmq:
+#        condition: service_healthy
     env_file:
       - .env
 
@@ -58,6 +61,41 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
+#
+#  rabbitmq:
+#    image: rabbitmq:latest
+#    hostname: rabbitmq
+#    restart: always
+#    container_name: rabbitmq
+#    networks:
+#      - main_network
+#    volumes:
+#      - rabbitmq_data:/var/lib/rabbitmq
+#    env_file:
+#      - .env
+#    ports:
+#      - 15672:15672
+#      - 5672:5672
+#    healthcheck:
+#      test: rabbitmq-diagnostics -q ping
+#      interval: 10s
+#      timeout: 30s
+#      retries: 5
+#      start_period: 20s
+#
+#  celery:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    env_file:
+#      - .env
+#    container_name: celery
+#    restart: always
+#    networks:
+#      - main_network
+#    command: ["celery", "--app=app.tasks.tasks:celery", "worker", "-l", "INFO"]
+#    depends_on:
+#      - backend
 
 networks:
   main_network:
@@ -67,3 +105,5 @@ volumes:
     name: postgres_data
   redis_data:
     name: redis_data
+#  rabbitmq_data:
+#    name: rabbitmq_data

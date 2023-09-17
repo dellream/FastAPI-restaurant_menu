@@ -4,7 +4,7 @@
 Парсер взаимодействует с объектом файла посредством
 библиотеки openyxl.
 """
-import json
+# import json
 
 from openpyxl import load_workbook
 from openpyxl.cell.cell import Cell
@@ -80,10 +80,10 @@ class ParserRepo:
             if self.sheet[f'A{i}'].value:
                 self.parse_result.append(self.make_menu(i, self.sheet.max_row))
 
-        # Добавляем вывод в консоль или в логи
-        for inform in self.parse_result:
-            print('Parsed item:')
-            print(json.dumps(inform, indent=4))  # Вывод в консоль
+        # # Добавляем вывод в консоль или в логи
+        # for inform in self.parse_result:
+        #     print('Parsed item:')
+        #     print(json.dumps(inform, indent=4))  # Вывод в консоль
 
         return self.parse_result
 
